@@ -1,0 +1,69 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UpdateMeasurementActivity" >
+
+    <LinearLayout
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"    
+        android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            
+            <TextView
+                android:id="@+id/statusLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/updateMeasurement_statusTitle"
+                android:textSize="@dimen/statusTextSize" />
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="@dimen/statusTextSize" 
+                android:paddingLeft="5dp"
+                android:ems="10" >
+
+                <requestFocus />
+            </TextView>
+
+        </LinearLayout>
+        
+            <ListView
+        android:id="@+id/in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="70dp"
+        android:paddingTop="20dp"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll" 
+         >
+
+    </ListView>
+
+            <ImageView
+                android:id="@+id/guideImage"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                 />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_uploadOrFirstTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="36dp"
+        android:onClick="onFirstTimeClick"
+        android:text="@string/updateMeasurement_firstTime" />
+
+</RelativeLayout>

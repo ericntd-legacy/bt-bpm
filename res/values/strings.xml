@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="app_name">Omron BPM v1.3</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="main_updateMeasurement">Update Measurement</string>
+    <string name="main_myMeasurement">My Measurement</string>
+    <string name="main_upload">Send to Doctor</string>
+    <string name="main_settings">Settings</string>
+    <string name="main_init_setup">Initial Setup</string>
+    <string name="title_activity_update_measurement">UpdateMeasurementActivity</string>
+    <string name="updateMeasurement_firstTime">Doing this for the first time?</string>
+    <string name="updateMeasurement_statusTitle">Status:</string>
+    <string name="updateMeasurement_bluetoothLbl">Bluetooth</string>
+    <string name="updateMeasurement_upload">Send to Doctor</string>
+    <string name="upload_numText">Send to: </string>
+
+    <!-- UpdateMeasurement -->
+    <string name="not_connected">You are not connected to a device</string>
+    <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
+    <string name="title_connecting">connecting...</string>
+    <string name="title_connected_to">connected to <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="title_not_connected">not connected</string>
+    <string name="title_ok">Ok</string>
+    <string name="discoverable">Make discoverable</string>
+    <string name="title_activity_upload">Send to Doctor</string>
+
+    <!-- qr code -->
+    <!-- <string name="app_name">Quick Response Code</string> -->
+    <string name="capture_name">QR Code Capture</string>
+    <string name="encoder_name">QR Code Encoder</string>
+    <string name="decoder_name">QR Code Decoder</string>
+    <string name="contents_contact">Contact info</string>
+    <string name="contents_email">Email address</string>
+    <string name="contents_location">Geographic coordinates</string>
+    <string name="contents_phone">Phone number</string>
+    <string name="contents_sms">SMS address</string>
+    <string name="contents_text">Plain text</string>
+    <string name="msg_default_contents">Contents</string>
+    <string name="msg_default_format">Format</string>
+    <string name="msg_default_meta">Metadata</string>
+    <string name="msg_default_mms_subject">Hi</string>
+    <string name="msg_default_status">Place a barcode inside the viewfinder rectangle to scan it.</string>
+    <string name="msg_default_time">Time</string>
+    <string name="msg_default_type">Type</string>
+    <string name="result_address_book">Found contact info</string>
+    <string name="result_calendar">Found calendar event</string>
+    <string name="result_email_address">Found email address</string>
+    <string name="result_geo">Found geographic coordinates</string>
+    <string name="result_isbn">Found book</string>
+    <string name="result_product">Found product</string>
+    <string name="result_sms">Found SMS address</string>
+    <string name="result_tel">Found phone number</string>
+    <string name="result_text">Found plain text</string>
+    <string name="result_uri">Found URL</string>
+    <string name="result_wifi">Found WLAN Configuration</string>
+    <string name="wifi_changing_network">Changing Network</string>
+    <string name="wifi_ssid_label">Network Name</string>
+    <string name="wifi_type_label">Type</string>
+    <string name="barcode_image">Barcode Image</string>
+    <string name="title_activity_setting">Setting</string>
+    
+    <!-- Buttons -->
+    <string name="btn_save">Save</string>
+    
+    <!-- Checkbox -->
+    <string name="checkbox_enable_legacy_sms">Enable Legacy SMS Format</string>
+
+</resources>
