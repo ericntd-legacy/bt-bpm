@@ -56,14 +56,14 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:onClick="onNormalSms"
-            android:text="Normal SMS" />
+            android:text="@string/btn_send_sms" />
 
         <Button
             android:id="@+id/btn_encodedSms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onEncodedSms"
-            android:text="Encoded SMS" />
+            android:onClick="sendSecureSMS"
+            android:text="@string/btn_send_secure_sms" />
 
     </LinearLayout>
 

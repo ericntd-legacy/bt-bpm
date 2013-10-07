@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import sg.edu.dukenus.securesms.crypto.MyKeyUtils;
+import sg.edu.dukenus.securesms.sms.SmsSender;
+import sg.edu.dukenus.securesms.utils.MyUtils;
 import sg.edu.nus.omronhealth.spp.BPMeasurementData;
 import sg.edu.nus.omronhealth.spp.OmronMeasurementData;
 
@@ -20,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.telephony.SmsManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -30,7 +34,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class UploadActivity extends MainActivity {
+	// debugging
 	private static final String TAG = "UploadActivity";
+	
+	private SmsSender smsSender;
 
 	private static final int MAX_SMS_MESSAGE_LENGTH = 160;
 
@@ -104,9 +111,9 @@ public class UploadActivity extends MainActivity {
 		
 		for(OmronMeasurementData measurementData : measurementDataList) {
 			tmp = (BPMeasurementData) measurementData;
-			String dateTime = tmp.getDateTime();
+			//String dateTime = tmp.getDateTime();
 			//msg = new StringBuilder(msg).append("@datetime="+dateTime+"@ ").toString();
-			String measurement = "@systolic="+tmp.getSys()+"@ @diastolic="+tmp.getDia()+"@ @HR="+tmp.getPulse()+"@";
+			//String measurement = "@systolic="+tmp.getSys()+"@ @diastolic="+tmp.getDia()+"@ @HR="+tmp.getPulse()+"@";
 			//msg = new StringBuilder(msg).append(measurement).append(" ").toString();
 		}
 		
@@ -193,28 +200,38 @@ public class UploadActivity extends MainActivity {
     	return msg;
     }
 	
-	public void onEncodedSms(View view){
+	public void sendSecureSMS(View view){
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		SharedPreferences prefs = getSharedPreferences(PREF_BPM, Context.MODE_PRIVATE);
+		boolean legacySMS = false;
+		
+		EditText phoneNumberField = (EditText) findViewById(R.id.phoneNum);
+		String contactNum = phoneNumberField.getText().toString();
 				
 		//String idStored = preferences.getString("deviceId", "NO_ID");
-		String macAddr = prefs.getString(PREF_MAC_ADDR, DEFAULT_MAC_ADDR);
+		BPMeasurementData tmp = null;
+		String measurementStr = "";
 		
-		String msg = new StringBuilder(APP_CODE).append(" ").append("@MAC="+macAddr+"@ ").toString();
 		for(OmronMeasurementData measurementData : measurementDataList) {
-			BPMeasurementData tmp = (BPMeasurementData) measurementData;
-			String dateTime = tmp.getDateTime();
-			msg = new StringBuilder(msg).append("@datetime="+dateTime+"@ ").toString();
-			String measurement = "@"+measurementData.toSmsMachineString()+"@";
-			msg = new StringBuilder(msg).append(measurement).append(" ").toString();
-        	
+			tmp = (BPMeasurementData) measurementData;
+			//String dateTime = tmp.getDateTime();
+			//msg = new StringBuilder(msg).append("@datetime="+dateTime+"@ ").toString();
+			//String measurement = "@systolic="+tmp.getSys()+"@ @diastolic="+tmp.getDia()+"@ @HR="+tmp.getPulse()+"@";
+			//msg = new StringBuilder(msg).append(measurement).append(" ").toString();
 		}
 		
-		Toast.makeText(this, msg + "  length: " + msg.length(),
-				Toast.LENGTH_LONG).show(); 
-		EditText phoneNumberField = (EditText) findViewById(R.id.phoneNum);
-		String phoneNumber = phoneNumberField.getText().toString();
-		sendSMS(phoneNumber, msg);
+		if (tmp!=null) {
+			//msg = constructSMS(PREF_BPM,-1, tmp.getSys(), tmp.getDia(), tmp.getPulse(), -1, tmp.getDateTimeMySQL());
+			if (legacySMS) measurementStr = constructLegacySMS(PREF_BPM,-1, tmp.getSys(), tmp.getDia(), tmp.getPulse(), -1, tmp.getDateTimeMySQL());
+			else measurementStr = constructSMS(PREF_BPM,-1, tmp.getSys(), tmp.getDia(), tmp.getPulse(), -1, tmp.getDateTimeMySQL());
+		}
+		
+		Log.w(TAG, "measurement string: "+measurementStr);
+		
+			//Toast.makeText(this, msg + "  length: " + msg.length(), Toast.LENGTH_LONG).show();
+			smsSender = new SmsSender(contactNum);
+			smsSender.sendSecureSMS(getApplicationContext(), measurementStr);
+		
 	}
 
 
@@ -252,7 +269,8 @@ public class UploadActivity extends MainActivity {
                 
         	}
         }
- 
+        
+        /*
         //---when the SMS has been sent---
         registerReceiver(new BroadcastReceiver(){
             @Override
@@ -299,7 +317,8 @@ public class UploadActivity extends MainActivity {
                         break;                        
                 }
             }
-        }, new IntentFilter(DELIVERED));        
+        }, new IntentFilter(DELIVERED));
+        */   
  
         SmsManager smsManager = SmsManager.getDefault();
         //sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);  

@@ -40,6 +40,7 @@ public final class R {
         public static final int guide1=0x7f020001;
         public static final int guide2=0x7f020002;
         public static final int ic_launcher=0x7f020003;
+        public static final int noti_icon_1=0x7f020004;
     }
     public static final class id {
         public static final int CheckboxEnableLegacySMS=0x7f070031;
@@ -125,13 +126,15 @@ public final class R {
         /**  Buttons 
          */
         public static final int btn_save=0x7f080036;
+        public static final int btn_send_secure_sms=0x7f080038;
+        public static final int btn_send_sms=0x7f080037;
         /**  qr code 
  <string name="app_name">Quick Response Code</string> 
          */
         public static final int capture_name=0x7f080016;
         /**  Checkbox 
          */
-        public static final int checkbox_enable_legacy_sms=0x7f080037;
+        public static final int checkbox_enable_legacy_sms=0x7f080039;
         public static final int contents_contact=0x7f080019;
         public static final int contents_email=0x7f08001a;
         public static final int contents_location=0x7f08001b;
@@ -142,12 +145,12 @@ public final class R {
         public static final int discoverable=0x7f080014;
         public static final int encoder_name=0x7f080017;
         public static final int hello_world=0x7f080001;
-        public static final int input_des_num=0x7f08004a;
-        public static final int input_device_id=0x7f080048;
-        public static final int input_mac_addr=0x7f08004c;
-        public static final int label_des_num=0x7f080049;
-        public static final int label_device_id=0x7f080047;
-        public static final int label_mac_addr=0x7f08004b;
+        public static final int input_des_num=0x7f08004c;
+        public static final int input_device_id=0x7f08004a;
+        public static final int input_mac_addr=0x7f08004e;
+        public static final int label_des_num=0x7f08004b;
+        public static final int label_device_id=0x7f080049;
+        public static final int label_mac_addr=0x7f08004d;
         public static final int main_init_setup=0x7f080007;
         public static final int main_myMeasurement=0x7f080004;
         public static final int main_settings=0x7f080006;
@@ -164,26 +167,26 @@ public final class R {
         /**  UpdateMeasurement 
          */
         public static final int not_connected=0x7f08000e;
-        public static final int pref_default_display_name=0x7f08003d;
-        public static final int pref_description_social_recommendations=0x7f08003b;
+        public static final int pref_default_display_name=0x7f08003f;
+        public static final int pref_description_social_recommendations=0x7f08003d;
         /**  Example settings for Data & Sync 
          */
-        public static final int pref_header_data_sync=0x7f08003f;
+        public static final int pref_header_data_sync=0x7f080041;
         /**  The following looks like some boilerplate code copied and pasted from somewhere 
          */
-        public static final int pref_header_general=0x7f080039;
+        public static final int pref_header_general=0x7f08003b;
         /**  Example settings for Notifications 
          */
-        public static final int pref_header_notifications=0x7f080042;
-        public static final int pref_ringtone_silent=0x7f080045;
-        public static final int pref_title_add_friends_to_messages=0x7f08003e;
-        public static final int pref_title_display_name=0x7f08003c;
-        public static final int pref_title_new_message_notifications=0x7f080043;
-        public static final int pref_title_ringtone=0x7f080044;
-        public static final int pref_title_social_recommendations=0x7f08003a;
-        public static final int pref_title_sync_frequency=0x7f080040;
-        public static final int pref_title_system_sync_settings=0x7f080041;
-        public static final int pref_title_vibrate=0x7f080046;
+        public static final int pref_header_notifications=0x7f080044;
+        public static final int pref_ringtone_silent=0x7f080047;
+        public static final int pref_title_add_friends_to_messages=0x7f080040;
+        public static final int pref_title_display_name=0x7f08003e;
+        public static final int pref_title_new_message_notifications=0x7f080045;
+        public static final int pref_title_ringtone=0x7f080046;
+        public static final int pref_title_social_recommendations=0x7f08003c;
+        public static final int pref_title_sync_frequency=0x7f080042;
+        public static final int pref_title_system_sync_settings=0x7f080043;
+        public static final int pref_title_vibrate=0x7f080048;
         public static final int result_address_book=0x7f080026;
         public static final int result_calendar=0x7f080027;
         public static final int result_email_address=0x7f080028;
@@ -196,7 +199,7 @@ public final class R {
         public static final int result_uri=0x7f08002f;
         public static final int result_wifi=0x7f080030;
         public static final int title_activity_setting=0x7f080035;
-        public static final int title_activity_settings=0x7f080038;
+        public static final int title_activity_settings=0x7f08003a;
         public static final int title_activity_update_measurement=0x7f080008;
         public static final int title_activity_upload=0x7f080015;
         public static final int title_connected_to=0x7f080011;
