@@ -17,9 +17,9 @@ package com.jwetherell.quick_response_code;
 import java.io.IOException;
 import java.util.Collection;
 
+import sg.edu.dukenus.bpmomron.SettingActivity;
+import sg.edu.dukenus.bpmomron.UpdateMeasurementActivity;
 import sg.edu.nus.omronhealth.R;
-import sg.edu.nus.omronhealth.SettingActivity;
-import sg.edu.nus.omronhealth.UpdateMeasurementActivity;
 
 import com.jwetherell.quick_response_code.camera.CameraManager;
 import com.jwetherell.quick_response_code.result.ResultHandler;
