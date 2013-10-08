@@ -2,7 +2,10 @@ package sg.edu.dukenus.securesms.crypto;
 
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -15,17 +18,23 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import sg.edu.dukenus.securesms.MainActivity;
+import sg.edu.dukenus.securesms.utils.MyUtils;
+
+import com.example.simplesms.R;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.TextView;
 
 public class MyKeyUtils {
 	// debugging
 	private static final String TAG = "MyKeyUtils";
 
 	// sharedpreferences
-	public static final String PREFS = "MyKeys";
+	public static final String PREFS_MY_KEYS = "MyKeys";
 
 	public static final String PREF_PUBLIC_MOD = "PublicModulus";
 	public static final String PREF_PUBLIC_EXP = "PublicExponent";
@@ -37,8 +46,8 @@ public class MyKeyUtils {
 	/*
 	 * get the modulus from sharedpreferences
 	 */
-	public static String getPubMod(String contactNum, Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(contactNum,
+	public static String getPubMod(String contactID, Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(contactID,
 				Context.MODE_PRIVATE);
 
 		String pubMod = prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF);
@@ -49,8 +58,8 @@ public class MyKeyUtils {
 	/*
 	 * get the modulus from sharedpreferences
 	 */
-	public static String getPubExp(String contactNum, Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(contactNum,
+	public static String getPubExp(String contactID, Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(contactID,
 				Context.MODE_PRIVATE);
 
 		String pubExp = prefs.getString(PREF_PUBLIC_EXP, DEFAULT_PREF);
@@ -59,7 +68,7 @@ public class MyKeyUtils {
 	}
 
 	protected static RSAPublicKeySpec getPublicKeySpec(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(PREFS,
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_MY_KEYS,
 				Context.MODE_PRIVATE);
 
 		String pubMod = prefs.getString(PREF_PRIVATE_MOD, DEFAULT_PREF);
@@ -147,6 +156,171 @@ public class MyKeyUtils {
 			}*/
 		}
 		return null;
+	}
+	
+	/*
+	 * Check if keys are found in the app's SharedPreferences if not, generate
+	 * them and save them to the app's SharedPreferences
+	 */
+	public static void checkKeys(int keySize, Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_MY_KEYS,
+				Context.MODE_PRIVATE);
+		String pubMod = prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF);
+		String pubExp = prefs.getString(PREF_PUBLIC_EXP, DEFAULT_PREF);
+		String privateMod = prefs.getString(PREF_PRIVATE_MOD, DEFAULT_PREF);
+		String privateExp = prefs.getString(PREF_PRIVATE_EXP, DEFAULT_PREF);
+
+		boolean keysExist = false;
+
+		if (!pubMod.isEmpty() && !pubExp.isEmpty()
+				&& !privateMod.isEmpty()
+				&& !privateExp.isEmpty()) {
+			Log.i(TAG, "keys found, not regenerating");
+			keysExist = true;
+		} else {
+
+			keysExist = false;
+		}
+		if (!keysExist) {
+			Log.w(TAG, "keys not found, generating");
+			generateKeys(keySize, context);
+		} else {
+			//MyUtils.alert("Keys exist, not generating", MainActivity.this);
+			byte[] myPubModBA = Base64.decode(pubMod, Base64.DEFAULT);
+			byte[] myPubExpBA = Base64.decode(pubExp, Base64.DEFAULT);
+			byte[] myPrivateModBA = Base64.decode(privateMod, Base64.DEFAULT);
+			byte[] myPrivateExpBA = Base64.decode(privateExp, Base64.DEFAULT);
+
+			BigInteger myPubModBI = new BigInteger(myPubModBA);
+			BigInteger myPubExpBI = new BigInteger(myPubExpBA);
+
+			BigInteger myPrivateModBI = new BigInteger(myPrivateModBA);
+			BigInteger myPrivateExpBI = new BigInteger(myPrivateExpBA);
+
+			Log.w(TAG, "the current user's stored public key modulus is "
+					+ myPubModBI + " while the exponent is " + myPubExpBI
+					+ " === private key modulus is " + myPrivateModBI
+					+ " and exponent is " + myPrivateExpBI);	
+		}
+	}
+	
+	public static void generateKeys(int keySize, Context context) {
+		Log.i(TAG, "keys not found, generating now");
+		try {
+
+			/*
+			 * Generating private and public key using RSA algorithm saving
+			 * the keys to the app's shared preferences
+			 */
+			KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+			kpg.initialize(keySize);
+			KeyPair kp = kpg.genKeyPair();
+			Key publicKey = kp.getPublic();
+			Key privateKey = kp.getPrivate();
+
+			KeyFactory fact = KeyFactory.getInstance("RSA");
+			RSAPublicKeySpec pub = fact.getKeySpec(publicKey,
+					RSAPublicKeySpec.class);
+			RSAPrivateKeySpec priv = fact.getKeySpec(privateKey,
+					RSAPrivateKeySpec.class);
+
+			/*
+			 * save the public key to the app's SharedPreferences
+			 */
+			savePublicKey(pub, context);
+			/*
+			 * save the private key to the app's SharedPreferences
+			 */
+			savePrivateKey(priv, context);
+
+		} catch (NoSuchAlgorithmException e) {
+			Log.e(TAG, "RSA algorithm not available", e);
+		} catch (InvalidKeySpecException e) {
+			Log.e(TAG, "", e);
+		}
+		/*
+		 * catch (IOException e) { Log.e(TAG,
+		 * "Having trouble saving key file", e); }
+		 */
+	}
+	
+	public static void savePublicKey(String mod, String exp, Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_MY_KEYS,
+				Context.MODE_PRIVATE);
+		SharedPreferences.Editor prefsEditor = prefs.edit();
+
+		prefsEditor.putString(PREF_PUBLIC_MOD, mod);
+		prefsEditor.putString(PREF_PUBLIC_EXP, exp);
+		// prefsEditor.putString(PREF_PRIVATE_MOD, DEFAULT_PRIVATE_MOD);
+		prefsEditor.commit();
+	}
+
+	private static void savePublicKey(RSAPublicKeySpec pubKey, Context context) {
+		BigInteger pubModBI = pubKey.getModulus();
+		BigInteger pubExpBI = pubKey.getPublicExponent();
+
+		byte[] pubModBA = pubModBI.toByteArray();// Base64.encodeInteger(pubModBI);
+													// // for some strange
+													// reason this throws
+													// NoSuchMethodError
+		byte[] pubExpBA = pubExpBI.toByteArray();// Base64.encodeInteger(pubExpBI);
+
+		try {
+			String pubModBase64Str = Base64.encodeToString(pubModBA,
+					Base64.DEFAULT);
+			String pubExpBase64Str = Base64.encodeToString(pubExpBA,
+					Base64.DEFAULT);
+
+			Log.i(TAG, "the modulus of the current user's public key is "
+					+ pubModBI + " and the exponent is " + pubExpBI
+					+ " | encoded module is " + pubModBase64Str
+					+ " | encoded exponent is " + pubExpBase64Str);
+
+			savePublicKey(pubModBase64Str, pubExpBase64Str, context);
+
+		} catch (NoSuchMethodError e) {
+			Log.e(TAG, "Base64.encode() method not available", e);
+		}
+		// TODO extract the modulus and exponent and save them
+	}
+
+	public static void savePrivateKey(RSAPrivateKeySpec privateKey, Context context) {
+		BigInteger privateModBI = privateKey.getModulus();
+		BigInteger privateExpBI = privateKey.getPrivateExponent();
+
+		byte[] privateModBA = privateModBI.toByteArray();// Base64.encodeInteger(pubModBI);
+															// // for some
+															// strange reason
+															// this throws
+															// NoSuchMethodError
+		byte[] privateExpBA = privateExpBI.toByteArray();// Base64.encodeInteger(pubExpBI);
+
+		try {
+			String privateModBase64Str = Base64.encodeToString(privateModBA,
+					Base64.DEFAULT);
+			String privateExpBase64Str = Base64.encodeToString(privateExpBA,
+					Base64.DEFAULT);
+			Log.i(TAG, "the modulus of the current user's private key is "
+					+ privateModBI + " and the exponent is " + privateExpBI
+					+ " | encoded module is " + privateModBase64Str
+					+ " | encoded exponent is " + privateExpBase64Str);
+
+			savePrivateKey(privateModBase64Str, privateExpBase64Str, context);
+
+		} catch (NoSuchMethodError e) {
+			Log.e(TAG, "Base64.encode() method not available", e);
+		}
+	}
+
+	private static void savePrivateKey(String mod, String exp, Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_MY_KEYS,
+				Context.MODE_PRIVATE);
+		SharedPreferences.Editor prefsEditor = prefs.edit();
+
+		prefsEditor.putString(PREF_PRIVATE_MOD, mod);
+		prefsEditor.putString(PREF_PRIVATE_EXP, exp);
+		// prefsEditor.putString(PREF_PRIVATE_MOD, DEFAULT_PRIVATE_MOD);
+		prefsEditor.commit();
 	}
 
 }
