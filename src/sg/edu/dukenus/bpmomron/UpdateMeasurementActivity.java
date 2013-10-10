@@ -33,7 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 
-public class UpdateMeasurementActivity extends MainActivity {
+public class UpdateMeasurementActivity extends Activity {
 	
     // Debugging
     private static final String TAG = "BtMeasurement";
@@ -88,8 +88,9 @@ public class UpdateMeasurementActivity extends MainActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		if(D) Log.e(TAG, "++onCreate++");
+		
 		super.onCreate(savedInstanceState);
+		if(D) Log.e(TAG, "++onCreate++");
 		setContentView(R.layout.activity_update_measurement);
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -434,7 +435,7 @@ public class UpdateMeasurementActivity extends MainActivity {
 	
 	private void connectToStoredDevice(){
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences preferences = getSharedPreferences(PREF_BPM, Context.MODE_PRIVATE);
+		SharedPreferences preferences = getSharedPreferences(MainActivity.PREF_BPM, Context.MODE_PRIVATE);
 		String macId = preferences.getString("macAddr", "00:00:00:00:00");
 		connectDevice(macId, false);
 		

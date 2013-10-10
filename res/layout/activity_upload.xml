@@ -62,7 +62,7 @@
             android:id="@+id/btn_encodedSms"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="sendSecureSMS"
+            android:onClick="handleSecureSMS"
             android:text="@string/btn_send_secure_sms" />
 
     </LinearLayout>

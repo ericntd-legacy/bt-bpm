@@ -18,10 +18,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import sg.edu.dukenus.securesms.MainActivity;
+import sg.edu.dukenus.securesms.sms.SmsSender;
 import sg.edu.dukenus.securesms.utils.MyUtils;
-
-import com.example.simplesms.R;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -43,6 +41,7 @@ public class MyKeyUtils {
 
 	public static final String DEFAULT_PREF = "";
 	public static final String DEFAULT_CONTACT_NUM = "+6584781395";
+	public static final int DEFAULT_KEY_SIZE = 1024;
 	/*
 	 * get the modulus from sharedpreferences
 	 */
@@ -74,7 +73,7 @@ public class MyKeyUtils {
 		String pubMod = prefs.getString(PREF_PRIVATE_MOD, DEFAULT_PREF);
 		String pubExp = prefs.getString(PREF_PRIVATE_EXP, DEFAULT_PREF);
 		// String recipient = prefs.getString(PREF_RECIPIENT_NUM, DEFAULT_PREF);
-		if (!pubMod.equals(DEFAULT_PREF) && !pubExp.equals(DEFAULT_PREF)) {
+		if (!pubMod.isEmpty() && !pubExp.isEmpty()) {
 			byte[] pubModBA = Base64.decode(pubMod, Base64.DEFAULT);
 			byte[] pubExpBA = Base64.decode(pubExp, Base64.DEFAULT);
 			BigInteger pubModBI = new BigInteger(pubModBA);
@@ -90,13 +89,15 @@ public class MyKeyUtils {
 	}
 	
 	public static RSAPublicKeySpec getRecipientsPublicKey(String contactNum, Context context) {
+		Log.w(TAG, "retrieving public key for contact "+contactNum);
 		SharedPreferences prefs = context.getSharedPreferences(contactNum,
 				Context.MODE_PRIVATE);
 
 		String pubMod = prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF);
 		String pubExp = prefs.getString(PREF_PUBLIC_EXP, DEFAULT_PREF);
+		Log.w(TAG, "the public modulus is "+pubMod+" and exponent is "+pubExp+ " for "+contactNum);
 		// String recipient = prefs.getString(PREF_RECIPIENT_NUM, DEFAULT_PREF);
-		if (!pubMod.equals(DEFAULT_PREF) && !pubExp.equals(DEFAULT_PREF)) {
+		if (!pubMod.isEmpty() && !pubExp.isEmpty()) {
 			Log.i(TAG, "great! public key found for "+contactNum+" with modulus "+pubMod +" and exponent "+pubExp);
 			byte[] pubModBA = Base64.decode(pubMod, Base64.DEFAULT);
 			byte[] pubExpBA = Base64.decode(pubExp, Base64.DEFAULT);
@@ -104,6 +105,7 @@ public class MyKeyUtils {
 			BigInteger pubExpBI = new BigInteger(pubExpBA);
 			Log.i(TAG, "public modulus is "+pubModBI+" and public exponent is "+pubExpBI+" in base 256 "+pubModBA+" "+pubExpBA);
 			
+			// do I need to catch any exception for the following?
 			RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(pubModBI,
 					pubExpBI);
 			//X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(encodedKey);
@@ -162,7 +164,7 @@ public class MyKeyUtils {
 	 * Check if keys are found in the app's SharedPreferences if not, generate
 	 * them and save them to the app's SharedPreferences
 	 */
-	public static void checkKeys(int keySize, Context context) {
+	public static boolean getKeys(int keySize, Context context) {
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_MY_KEYS,
 				Context.MODE_PRIVATE);
 		String pubMod = prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF);
@@ -183,7 +185,8 @@ public class MyKeyUtils {
 		}
 		if (!keysExist) {
 			Log.w(TAG, "keys not found, generating");
-			generateKeys(keySize, context);
+			return generateKeys(keySize, context);
+			
 		} else {
 			//MyUtils.alert("Keys exist, not generating", MainActivity.this);
 			byte[] myPubModBA = Base64.decode(pubMod, Base64.DEFAULT);
@@ -201,10 +204,11 @@ public class MyKeyUtils {
 					+ myPubModBI + " while the exponent is " + myPubExpBI
 					+ " === private key modulus is " + myPrivateModBI
 					+ " and exponent is " + myPrivateExpBI);	
+			return true;
 		}
 	}
 	
-	public static void generateKeys(int keySize, Context context) {
+	public static boolean generateKeys(int keySize, Context context) {
 		Log.i(TAG, "keys not found, generating now");
 		try {
 
@@ -232,6 +236,8 @@ public class MyKeyUtils {
 			 * save the private key to the app's SharedPreferences
 			 */
 			savePrivateKey(priv, context);
+			
+			return true;
 
 		} catch (NoSuchAlgorithmException e) {
 			Log.e(TAG, "RSA algorithm not available", e);
@@ -242,6 +248,7 @@ public class MyKeyUtils {
 		 * catch (IOException e) { Log.e(TAG,
 		 * "Having trouble saving key file", e); }
 		 */
+		return false;
 	}
 	
 	public static void savePublicKey(String mod, String exp, Context context) {
@@ -267,9 +274,9 @@ public class MyKeyUtils {
 
 		try {
 			String pubModBase64Str = Base64.encodeToString(pubModBA,
-					Base64.DEFAULT);
+					Base64.NO_WRAP);
 			String pubExpBase64Str = Base64.encodeToString(pubExpBA,
-					Base64.DEFAULT);
+					Base64.NO_WRAP);
 
 			Log.i(TAG, "the modulus of the current user's public key is "
 					+ pubModBI + " and the exponent is " + pubExpBI
@@ -297,9 +304,9 @@ public class MyKeyUtils {
 
 		try {
 			String privateModBase64Str = Base64.encodeToString(privateModBA,
-					Base64.DEFAULT);
+					Base64.NO_WRAP);
 			String privateExpBase64Str = Base64.encodeToString(privateExpBA,
-					Base64.DEFAULT);
+					Base64.NO_WRAP);
 			Log.i(TAG, "the modulus of the current user's private key is "
 					+ privateModBI + " and the exponent is " + privateExpBI
 					+ " | encoded module is " + privateModBase64Str
@@ -321,6 +328,22 @@ public class MyKeyUtils {
 		prefsEditor.putString(PREF_PRIVATE_EXP, exp);
 		// prefsEditor.putString(PREF_PRIVATE_MOD, DEFAULT_PRIVATE_MOD);
 		prefsEditor.commit();
+	}
+	
+	public static void requestForKey(String contactNum, Context context) {
+		Log.w(TAG, "hey why is this not running?");
+		// get user's own keys
+		boolean keys = MyKeyUtils.getKeys(DEFAULT_KEY_SIZE, context);
+		
+		if (keys) {
+			Log.w(TAG, "user's own keys found");
+			SmsSender smsSender = new SmsSender(contactNum);
+		
+			smsSender.sendKeyExchangeSMS(context);
+		} else {
+			Log.e(TAG, "could not find exisiting keys or generate new keys of user's own");
+		}
+		
 	}
 
 }
