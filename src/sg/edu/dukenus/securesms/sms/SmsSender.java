@@ -57,7 +57,7 @@ public class SmsSender {
 		String DELIVERED = "SMS_DELIVERED";
 		SmsManager sm = SmsManager.getDefault();
 
-		if (this.message != null && !this.message.isEmpty()) {
+		if (this.message != null && !this.message.isEmpty() && this.recipientNum!=null && !this.recipientNum.isEmpty()) {
 			
 			ArrayList<String> parts = sm.divideMessage(this.message);
 
@@ -76,7 +76,7 @@ public class SmsSender {
 			sm.sendMultipartTextMessage(this.recipientNum, null, parts,
 					sentIntents, deliveryIntents);
 		} else {
-			Log.e(TAG, "message is not set");
+			Log.e(TAG, "message or contact num not set, message: "+this.message+" and recipient: "+this.recipientNum);
 		}
 	}
 
@@ -105,13 +105,13 @@ public class SmsSender {
 			Context context) {
 		if (mod.length() != 0 && exp.length() != 0) {
 			String msg = "keyx " + mod + " " + exp;
-			Log.i(TAG, "Sending key exchange sms: '" + msg + "' with length: "+msg.length());
+			Log.i(TAG, "Sending key exchange sms: '" + msg + "' with length: "+msg.length() + " to "+recipient);
 			
 			this.recipientNum = recipient;
 			this.message = msg;
 			// TextView debug = (TextView) findViewById(R.id.DebugMessages);
 			// debug.append("Sending key exchange sms: '" + msg + "'");
-			if (msg.length() > 160) {
+			if (this.message.length() > 160) {
 				sendLongSMS(context);
 			} else {
 				sendSMS(context);
@@ -126,18 +126,23 @@ public class SmsSender {
 		// key
 		// SharedPreferences prefs = getSharedPreferences(PREFS,
 		// Context.MODE_PRIVATE);
-
-		String pubMod = MyKeyUtils.getPubMod(MyKeyUtils.PREFS_MY_KEYS, context);
-		//String pubMod = MyKeyUtils.getPubMod(this.recipientNum, context);
-		// String pubExp = prefs.getString(PREF_PUBLIC_EXP, DEFAULT_PREF);
-		String pubExp = MyKeyUtils.getPubExp(MyKeyUtils.PREFS_MY_KEYS, context);
-
-		// EditText recipient = (EditText) findViewById(R.id.InputRecipientNum);
-		if (pubMod.length() != 0 && pubExp.length() != 0) {
-			sendKeyExchangeSMS(this.recipientNum, pubMod, pubExp, context);
+		if (this.recipientNum==null || this.recipientNum.isEmpty()) {
+			Log.e(TAG, "Recipient number is not set: "+this.recipientNum);
+			MyUtils.alert("Recipient number not set", context);
 		} else {
-			Log.w(TAG, "mod or exp of public key not found");
-			MyUtils.alert("key not found, please generate first", context);
+
+			String pubMod = MyKeyUtils.getPubMod(MyKeyUtils.PREFS_MY_KEYS, context);
+			//String pubMod = MyKeyUtils.getPubMod(this.recipientNum, context);
+			// String pubExp = prefs.getString(PREF_PUBLIC_EXP, DEFAULT_PREF);
+			String pubExp = MyKeyUtils.getPubExp(MyKeyUtils.PREFS_MY_KEYS, context);
+		
+			// EditText recipient = (EditText) findViewById(R.id.InputRecipientNum);
+			if (pubMod.length() != 0 && pubExp.length() != 0) {
+				sendKeyExchangeSMS(this.recipientNum, pubMod, pubExp, context);
+			} else {
+				Log.w(TAG, "mod or exp of public key not found");
+				MyUtils.alert("key not found, please generate first", context);
+			}
 		}
 	}
 

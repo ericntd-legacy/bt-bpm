@@ -87,10 +87,10 @@ public class UploadActivity extends Activity {
 		
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences prefs = getSharedPreferences(MainActivity.PREF_BPM,
+		SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREF_BPM,
 				Context.MODE_PRIVATE);
 
-		String desNumStored = prefs.getString(MainActivity.PREF_DES_NUM, "");
+		String desNumStored = prefs.getString(SettingsActivity.PREF_DES_NUM, "");
 
 		if (!desNumStored.isEmpty()) {
 			EditText phoneNum = (EditText) findViewById(R.id.phoneNum);
@@ -175,16 +175,16 @@ public class UploadActivity extends Activity {
 
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences prefs = getSharedPreferences(MainActivity.PREF_BPM,
+		SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREF_BPM,
 				Context.MODE_PRIVATE);
-		boolean legacySMS = prefs.getBoolean(MainActivity.PREF_LEGACY_SMS,
-				MainActivity.DEFAULT_LEGACY_SMS);
+		boolean legacySMS = prefs.getBoolean(SettingsActivity.PREF_LEGACY_SMS,
+				SettingsActivity.DEFAULT_LEGACY_SMS);
 
 		// String idStored = preferences.getString("deviceId", "NO_ID");
-		// String macAddr = prefs.getString(MainActivity.PREF_MAC_ADDR, MainActivity.DEFAULT_MAC_ADDR);
+		// String macAddr = prefs.getString(SettingActivity.PREF_MAC_ADDR, SettingActivity.DEFAULT_MAC_ADDR);
 
 		// String msg = new
-		// StringBuilder(MainActivity.APP_CODE).append(" ").append("@MAC="+macAddr+"@ ").toString();
+		// StringBuilder(SettingActivity.APP_CODE).append(" ").append("@MAC="+macAddr+"@ ").toString();
 		BPMeasurementData tmp = null;
 		String msg = "";
 
@@ -200,14 +200,14 @@ public class UploadActivity extends Activity {
 		}
 
 		if (tmp != null) {
-			// msg = constructSMS(MainActivity.PREF_BPM,-1, tmp.getSys(), tmp.getDia(),
+			// msg = constructSMS(SettingActivity.PREF_BPM,-1, tmp.getSys(), tmp.getDia(),
 			// tmp.getPulse(), -1, tmp.getDateTimeMySQL());
 			if (legacySMS)
-				msg = constructLegacySMS(MainActivity.PREF_BPM, -1, tmp.getSys(),
+				msg = constructLegacySMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
 						tmp.getDia(), tmp.getPulse(), -1,
 						tmp.getDateTimeMySQL());
 			else
-				msg = constructSMS(MainActivity.PREF_BPM, -1, tmp.getSys(), tmp.getDia(),
+				msg = constructSMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(), tmp.getDia(),
 						tmp.getPulse(), -1, tmp.getDateTimeMySQL());
 		}
 
@@ -227,14 +227,14 @@ public class UploadActivity extends Activity {
 	private String constructSMS(String pref, int weight, int systolic,
 			int diastolic, int pulse, int spo2, String measurementDate) {
 		// Code for this app
-		String msg = MainActivity.APP_CODE + " ";
+		String msg = SettingsActivity.APP_CODE + " ";
 
 		// MAC address of the health device
-		String macAddr = MainActivity.DEFAULT_MAC_ADDR;
+		String macAddr = SettingsActivity.DEFAULT_MAC_ADDR;
 
 		SharedPreferences tmp = getSharedPreferences(pref, Context.MODE_PRIVATE);
 		if (tmp != null) {
-			macAddr = tmp.getString(MainActivity.PREF_MAC_ADDR, MainActivity.DEFAULT_MAC_ADDR);
+			macAddr = tmp.getString(SettingsActivity.PREF_MAC_ADDR, SettingsActivity.DEFAULT_MAC_ADDR);
 			if (D)
 				Log.w(TAG, "mac address of the pulse oximeter is " + macAddr);
 		}
@@ -278,11 +278,11 @@ public class UploadActivity extends Activity {
 		String msg = "From ";
 
 		// MAC address of the health device
-		String macAddr = MainActivity.DEFAULT_MAC_ADDR;
+		String macAddr = SettingsActivity.DEFAULT_MAC_ADDR;
 
 		SharedPreferences tmp = getSharedPreferences(pref, Context.MODE_PRIVATE);
 		if (tmp != null) {
-			macAddr = tmp.getString(MainActivity.PREF_MAC_ADDR, MainActivity.DEFAULT_MAC_ADDR);
+			macAddr = tmp.getString(SettingsActivity.PREF_MAC_ADDR, SettingsActivity.DEFAULT_MAC_ADDR);
 			if (D)
 				Log.w(TAG, "mac address of the health device is " + macAddr);
 		}
@@ -324,7 +324,7 @@ public class UploadActivity extends Activity {
 	public void sendSecureSMS() {
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences prefs = getSharedPreferences(MainActivity.PREF_BPM,
+		SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREF_BPM,
 				Context.MODE_PRIVATE);
 		boolean legacySMS = false;
 
@@ -347,14 +347,14 @@ public class UploadActivity extends Activity {
 		}
 
 		if (tmp != null) {
-			// msg = constructSMS(MainActivity.PREF_BPM,-1, tmp.getSys(), tmp.getDia(),
+			// msg = constructSMS(SettingActivity.PREF_BPM,-1, tmp.getSys(), tmp.getDia(),
 			// tmp.getPulse(), -1, tmp.getDateTimeMySQL());
 			if (legacySMS)
-				measurementStr = constructLegacySMS(MainActivity.PREF_BPM, -1, tmp.getSys(),
+				measurementStr = constructLegacySMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
 						tmp.getDia(), tmp.getPulse(), -1,
 						tmp.getDateTimeMySQL());
 			else
-				measurementStr = constructSMS(MainActivity.PREF_BPM, -1, tmp.getSys(),
+				measurementStr = constructSMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
 						tmp.getDia(), tmp.getPulse(), -1,
 						tmp.getDateTimeMySQL());
 		}

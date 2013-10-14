@@ -61,7 +61,7 @@
             android:label="@string/title_activity_settings" >
         </activity>-->
         <activity
-            android:name="sg.edu.dukenus.bpmomron.SettingActivity"
+            android:name="sg.edu.dukenus.bpmomron.SettingsActivity"
             android:label="@string/title_activity_setting" >
         </activity>
         

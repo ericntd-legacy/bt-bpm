@@ -3,6 +3,7 @@ package sg.edu.dukenus.bpmomron;
 import java.util.ArrayList;
 
 import sg.edu.dukenus.bpmomron.BluetoothSPPService;
+import sg.edu.dukenus.securesms.crypto.MyKeyUtils;
 import sg.edu.nus.omronhealth.R;
 import sg.edu.nus.omronhealth.db.BP_DAO;
 import sg.edu.nus.omronhealth.spp.BPMeasurementData;
@@ -92,6 +93,9 @@ public class UpdateMeasurementActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		if(D) Log.e(TAG, "++onCreate++");
 		setContentView(R.layout.activity_update_measurement);
+		
+		MyKeyUtils.checkKeys(getApplicationContext());
+		
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
@@ -435,7 +439,7 @@ public class UpdateMeasurementActivity extends Activity {
 	
 	private void connectToStoredDevice(){
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences preferences = getSharedPreferences(MainActivity.PREF_BPM, Context.MODE_PRIVATE);
+		SharedPreferences preferences = getSharedPreferences(SettingsActivity.PREF_BPM, Context.MODE_PRIVATE);
 		String macId = preferences.getString("macAddr", "00:00:00:00:00");
 		connectDevice(macId, false);
 		

@@ -3,22 +3,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/title_activity_settings"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+    <TableLayout
+        android:id="@+id/TableSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
@@ -33,16 +25,14 @@
                 android:id="@+id/inputDeviceId"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="3"
                 android:ems="10"
-                android:hint="@string/input_device_id" >
+                android:hint="@string/input_device_id" />
+        </TableRow>
 
-                <requestFocus />
-            </EditText>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
@@ -57,14 +47,16 @@
                 android:id="@+id/inputDesNum"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="3"
                 android:ems="10"
-                android:inputType="phone" />
-        </LinearLayout>
+                android:inputType="phone" >
 
-        <LinearLayout
-            android:id="@+id/LayoutMAC"
-            android:layout_width="match_parent"
+            </EditText>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <TextView
@@ -79,15 +71,28 @@
                 android:id="@+id/inputMacAddr"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="3"
                 android:ems="10"
                 android:hint="@string/input_mac_addr" />
-        </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </TableRow>
+    </TableLayout>
+
+
+
+   
 
         <LinearLayout
             android:id="@+id/layoutSMSFormat"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:layout_below="@id/TableSettings"
+            android:layout_marginTop="30dp" >
 
             <CheckBox
                 android:id="@+id/CheckboxEnableLegacySMS"
@@ -97,7 +102,6 @@
 
         </LinearLayout>
 
-    </LinearLayout>
 
     <Button
         android:id="@+id/btnSave"

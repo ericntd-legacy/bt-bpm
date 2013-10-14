@@ -25,7 +25,7 @@ public class SettingActivity extends MainActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.setting);
+		setContentView(R.layout.activity_settings);
 
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		//prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

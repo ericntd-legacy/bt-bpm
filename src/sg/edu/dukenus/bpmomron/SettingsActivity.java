@@ -19,14 +19,29 @@ import android.widget.Toast;
 import android.widget.Button;
 import android.widget.CheckBox;
 
-public class SettingActivity extends MainActivity {
-
+public class SettingsActivity extends Activity {
+	// debugging
 	private static final String TAG = "SettingsActivity";
+	private final boolean D = true;
+	
+	// application's preferences including settings
+		public static final String PREF_BPM = "BPM preferences";
+		public static final String PREF_MAC_ADDR = "macAddr";
+		public static final String PREF_DES_NUM = "desNum";
+		public static final String PREF_DEVICE_NAME = "deviceName";
+		public static final String PREF_LEGACY_SMS = "Legacy SMS Format";;
+		public static final String DEFAULT_MAC_ADDR = "00:00:00:00:00:00";
+		public static final String APP_CODE = "gmstelehealth";
+		public static final String DEFAULT_NUM = "+6584781395";
+		public static final boolean DEFAULT_LEGACY_SMS = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.setting);
+		setContentView(R.layout.activity_settings);
+		
+		// Update the title in the action bar
+		// getActionBar().setTitle("Settings");
 
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		//prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -102,6 +117,7 @@ public class SettingActivity extends MainActivity {
 
 		    }
 		});
+		
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,16 +43,6 @@ public class MainActivity extends Activity {
 	protected final boolean D = true;
 	private final String TAG = "MainActivity";
 
-	// application's preferences including settings
-	protected static final String PREF_BPM = "BPM preferences";
-	protected static final String PREF_MAC_ADDR = "macAddr";
-	protected static final String PREF_DES_NUM = "desNum";
-	protected static final String PREF_DEVICE_NAME = "deviceName";
-	protected static final String PREF_LEGACY_SMS = "Legacy SMS Format";;
-	protected static final String DEFAULT_MAC_ADDR = "00:00:00:00:00:00";
-	protected static final String APP_CODE = "gmstelehealth";
-	protected static final String DEFAULT_NUM = "85577008";
-	protected static final boolean DEFAULT_LEGACY_SMS = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,51 +55,7 @@ public class MainActivity extends Activity {
 		 */
 		registerReceivers();
 
-		/*
-		 * Check existing public key of the number set in Settings e.g. Gammu
-		 * server +6584781395 request for key if not found
-		 */
-		SharedPreferences prefs1 = getSharedPreferences(PREF_BPM,
-				Context.MODE_PRIVATE);
-		String setServerNum = prefs1.getString(PREF_DES_NUM, "");
-		Log.w(TAG, "checking whether a key is stored for " + setServerNum);
-		SharedPreferences prefs = getSharedPreferences(setServerNum,
-				Context.MODE_PRIVATE);
-
-		/*
-		 * Clear the sharedpreferences for testing
-		 */
-		SharedPreferences.Editor prefsEditor = prefs.edit();
-		prefsEditor.clear();
-		prefsEditor.commit();
-		Log.w(TAG,
-				"For testing purpose only - sharedpreferences cleared for contact "
-						+ setServerNum);
-		// --------------------------------
-
-		String contactPubMod = prefs.getString(MyKeyUtils.PREF_PUBLIC_MOD,
-				MyKeyUtils.DEFAULT_PREF);
-		String contactPubExp = prefs.getString(MyKeyUtils.PREF_PUBLIC_EXP,
-				MyKeyUtils.DEFAULT_PREF);
-		if (!contactPubMod.isEmpty() && !contactPubExp.isEmpty()) {
-			Log.w(TAG, "public key stored for " + setServerNum + " with mod: "
-					+ contactPubMod + " and exp: " + contactPubExp);
-		} else {
-			Log.w(TAG, "public key not found for " + setServerNum
-					+ ", requesting for it, hang on!");
-			Toast.makeText(
-					getApplicationContext(),
-					"public key not found for " + setServerNum
-							+ ", requesting for it, hang on!",
-					Toast.LENGTH_LONG).show();
-			MyUtils.RequestKeyTask task = new MyUtils.RequestKeyTask(
-					setServerNum, getApplicationContext());
-			task.execute();
-		}
-
-		// clear the sharedpreferences of default_server_num for testing
-		// prefs = getSharedPreferences(DEFAULT_SERVER_NUM,
-		// Context.MODE_PRIVATE);
+		MyKeyUtils.checkKeys(getApplicationContext());
 
 	}
 
@@ -157,32 +104,32 @@ public class MainActivity extends Activity {
 	}
 
 	public void onMyButtonClick(View view) {
-		Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show();
 	}
 
 	public void onUpdateClick(View view) {
-		Toast.makeText(this, "Update clicked!", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Update clicked!", Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(this, UpdateMeasurementActivity.class);
 		startActivity(intent);
 	}
 
 	public void onMyMeasurementClick(View view) {
-		Toast.makeText(this, "Measurement clicked!", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Measurement clicked!", Toast.LENGTH_SHORT).show();
 	}
 
 	public void onUploadClick(View view) {
-		Toast.makeText(this, "Upload clicked!", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Upload clicked!", Toast.LENGTH_SHORT).show();
 	}
 
 	public void onInitSetupClick(View view) {
-		Toast.makeText(this, "Init Setup clicked!", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Init Setup clicked!", Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(this, DecoderActivity.class);
 		startActivity(intent);
 	}
 
 	public void onSettingsClick(View view) {
-		Toast.makeText(this, "Settings clicked!", Toast.LENGTH_SHORT).show();
-		Intent intent = new Intent(this, SettingActivity.class);
+		//Toast.makeText(this, "Settings clicked!", Toast.LENGTH_SHORT).show();
+		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
 
@@ -269,22 +216,21 @@ public class MainActivity extends Activity {
 						+ " "
 						+ (MyKeyUtils.getRecipientsPublicKey(contactNum,
 								getApplicationContext()) != null));
-		Toast.makeText(getApplicationContext(), "ready to send secure message",
-				Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), "Ready to send secure message to "+contactNum,
+				Toast.LENGTH_SHORT).show();
 	}
 
 	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		// SharedPreferences
-		private final String PREFS = "MyKeys";
-		private final String PREF_PUBLIC_MOD = "PublicModulus";
-		private final String PREF_PUBLIC_EXP = "PublicExponent";
-		private final String PREF_PRIVATE_MOD = "PrivateModulus";
-		private final String PREF_PRIVATE_EXP = "PrivateExponent";
+		//private final String PREFS = "MyKeys";
+		//private final String PREF_PUBLIC_MOD = "PublicModulus";
+		//private final String PREF_PUBLIC_EXP = "PublicExponent";
+		//private final String PREF_PRIVATE_MOD = "PrivateModulus";
+		//private final String PREF_PRIVATE_EXP = "PrivateExponent";
 
 		// private final String PREF_PHONE_NUMBER = "PhoneNumber";
 		// private final String PREF_RECIPIENT_NUM = "PhoneNumber";
 
-		private final String DEFAULT_PREF = "";
 
 		// sms codes
 		private final String KEY_EXCHANGE_CODE = "keyx";
@@ -392,9 +338,9 @@ public class MainActivity extends Activity {
 				SharedPreferences.Editor prefsEditor = prefs.edit();
 
 				prefsEditor
-						.putString(PREF_PUBLIC_MOD, recipientPubModBase64Str);
+						.putString(MyKeyUtils.PREF_PUBLIC_MOD, recipientPubModBase64Str);
 				prefsEditor
-						.putString(PREF_PUBLIC_EXP, recipientPubExpBase64Str);
+						.putString(MyKeyUtils.PREF_PUBLIC_EXP, recipientPubExpBase64Str);
 				// prefsEditor.putString(PREF_PHONE_NUMBER, recipient);
 				prefsEditor.commit();
 
@@ -402,10 +348,9 @@ public class MainActivity extends Activity {
 						"successfully remembered the contact "
 								+ contactNum
 								+ " and its public key module "
-								+ prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF)
+								+ prefs.getString(MyKeyUtils.PREF_PUBLIC_MOD, MyKeyUtils.DEFAULT_PREF)
 								+ " and exponent "
-								+ prefs.getString(PREF_PUBLIC_EXP,
-										PREF_PUBLIC_EXP));
+								+ prefs.getString(MyKeyUtils.PREF_PUBLIC_EXP, MyKeyUtils.DEFAULT_PREF));
 				Toast.makeText(context, "Got public key for " + contactNum,
 						Toast.LENGTH_LONG).show();
 
@@ -439,17 +384,17 @@ public class MainActivity extends Activity {
 			if (parts.length == 2) {
 
 				// TODO get the private key of the intended recipient
-				SharedPreferences prefs = context.getSharedPreferences(PREFS,
+				SharedPreferences prefs = context.getSharedPreferences(MyKeyUtils.PREFS_MY_KEYS,
 						Context.MODE_PRIVATE);
 
-				String privateMod = prefs.getString(PREF_PRIVATE_MOD,
-						DEFAULT_PREF);
-				String priavteExp = prefs.getString(PREF_PRIVATE_EXP,
-						DEFAULT_PREF);
+				String privateMod = prefs.getString(MyKeyUtils.PREF_PRIVATE_MOD,
+						MyKeyUtils.DEFAULT_PREF);
+				String priavteExp = prefs.getString(MyKeyUtils.PREF_PRIVATE_EXP,
+						MyKeyUtils.DEFAULT_PREF);
 				// String recipient = prefs.getString(PREF_RECIPIENT_NUM,
-				// DEFAULT_PREF);
-				if (!privateMod.equals(DEFAULT_PREF)
-						&& !priavteExp.equals(DEFAULT_PREF)) {
+				// MyKeyUtils.DEFAULT_PREF);
+				if (!privateMod.equals(MyKeyUtils.DEFAULT_PREF)
+						&& !priavteExp.equals(MyKeyUtils.DEFAULT_PREF)) {
 					byte[] recipientPrivateModBA = Base64.decode(privateMod,
 							Base64.DEFAULT);
 					byte[] recipientPrivateExpBA = Base64.decode(priavteExp,

@@ -17,7 +17,7 @@ package com.jwetherell.quick_response_code;
 import java.io.IOException;
 import java.util.Collection;
 
-import sg.edu.dukenus.bpmomron.SettingActivity;
+import sg.edu.dukenus.bpmomron.SettingsActivity;
 import sg.edu.dukenus.bpmomron.UpdateMeasurementActivity;
 import sg.edu.nus.omronhealth.R;
 
@@ -184,7 +184,7 @@ public class DecoderActivity extends Activity implements IDecoderActivity, Surfa
         Log.d(TAG, "decoded as:" + rawResult.getText());
         // goto settings
                 
-    	Intent intent = new Intent(this, SettingActivity.class);
+    	Intent intent = new Intent(this, SettingsActivity.class);
     	intent.putExtra("qrcode", rawResult.getText());
     	startActivity(intent);
     }
