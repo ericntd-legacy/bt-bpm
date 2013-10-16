@@ -20,7 +20,8 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-import sg.edu.nus.omronhealth.R;
+import sg.edu.dukenus.bpmomron.R;
+
 import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
 import com.jwetherell.quick_response_code.result.ResultHandler;

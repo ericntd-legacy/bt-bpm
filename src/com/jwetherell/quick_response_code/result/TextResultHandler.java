@@ -16,11 +16,11 @@
 
 package com.jwetherell.quick_response_code.result;
 
+import sg.edu.dukenus.bpmomron.R;
+
 import com.google.zxing.Result;
 import com.google.zxing.client.result.ParsedResult;
 import com.google.zxing.client.result.TextParsedResult;
-
-import sg.edu.nus.omronhealth.R;
 
 import android.app.Activity;
 

@@ -26,7 +26,8 @@ import android.util.Log;
 
 import java.util.Collection;
 
-import sg.edu.nus.omronhealth.R;
+import sg.edu.dukenus.bpmomron.R;
+
 import com.jwetherell.quick_response_code.camera.CameraManager;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;

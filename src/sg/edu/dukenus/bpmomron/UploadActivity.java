@@ -21,9 +21,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import sg.edu.dukenus.securesms.crypto.MyKeyUtils;
+import sg.edu.dukenus.securesms.sms.SmsReceiver;
 import sg.edu.dukenus.securesms.sms.SmsSender;
 import sg.edu.dukenus.securesms.utils.MyUtils;
-import sg.edu.nus.omronhealth.R;
 import sg.edu.nus.omronhealth.spp.BPMeasurementData;
 import sg.edu.nus.omronhealth.spp.OmronMeasurementData;
 
@@ -68,6 +68,15 @@ public class UploadActivity extends Activity {
 
 	// intent
 	final String UPLOAD_FROM_DB = "UploadFromDB";
+	
+	private SmsReceiver mSmsReceiver;
+    private SmsReceiver sentReportReceiver;
+    private SmsReceiver deliveredReportReceiver;
+
+    // actions/ intent filters
+    private final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+    private final String SMS_SENT = "SMS_SENT";
+    private final String SMS_DELIVERED = "SMS_DELIVERED";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,14 +84,10 @@ public class UploadActivity extends Activity {
 		Log.w(TAG, "onCreate");
 		setContentView(R.layout.activity_upload);
 
-		// Get the message from the intent
-		Intent intent = getIntent();
-		String act = intent.getAction();
-
 		/*
 		 * Check existing public keys of the server +6584781395
 		 */
-		SharedPreferences prefs1 = getSharedPreferences(
+		/*SharedPreferences prefs1 = getSharedPreferences(
 				MyKeyUtils.DEFAULT_CONTACT_NUM, Context.MODE_PRIVATE);
 		String contactPubMod = prefs1.getString(MyKeyUtils.PREF_PUBLIC_MOD,
 				MyKeyUtils.DEFAULT_PREF);
@@ -95,7 +100,7 @@ public class UploadActivity extends Activity {
 		} else {
 			Log.w(TAG, "public key not found for "
 					+ MyKeyUtils.DEFAULT_CONTACT_NUM + " so where did it go?");
-		}
+		}*/
 
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -109,7 +114,20 @@ public class UploadActivity extends Activity {
 			EditText phoneNum = (EditText) findViewById(R.id.phoneNum);
 			phoneNum.setText(desNumStored);
 		}
+		
+		// TODO check if keys available for such number
 
+		prepareMeasurements();
+		
+		mSmsReceiver = new SmsReceiver();
+        sentReportReceiver = new SmsReceiver();
+        deliveredReportReceiver = new SmsReceiver();
+	}
+	
+	private void prepareMeasurements() {
+		// Get the message from the intent
+				Intent intent = getIntent();
+				String act = intent.getAction();
 		/*
 		 * if the measurement is retrieved directly from the app's
 		 * sharedpreferences
@@ -123,18 +141,9 @@ public class UploadActivity extends Activity {
 			// TODO: manually construct measurement data from the app's
 			// sharedpreferences
 			measurementDataList = new ArrayList<OmronMeasurementData>();
-			BPMeasurementData measurement = new BPMeasurementData('A', 13, 10,
-					16, 17, 57, 11, 0, 130, 80, 70, 0, 0); // all values such as
-															// UNo, systolic or
-															// diastolic are
-															// supposed to be
-															// stored in the
-															// app's
-															// sharedpreferences
-															// everytime a
-															// measurement is
-															// grabbed from the
-															// BPM via Bluetooth
+			
+			BPMeasurementData measurement = retrieveLatestMeasurement();
+			
 			measurementDataList.add(measurement);
 			setup();
 			mConversationArrayAdapter.add(measurement.toString());
@@ -160,7 +169,38 @@ public class UploadActivity extends Activity {
 				mConversationArrayAdapter.add(measurementData.toString());
 			}
 		}
-
+	}
+	
+	private BPMeasurementData retrieveLatestMeasurement() {
+		SharedPreferences prefs = getSharedPreferences("LatestMeasurement", Context.MODE_PRIVATE);
+		
+		char UNo = prefs.getString("UNo", "A").charAt(0);
+		int YY = prefs.getInt("YY", 12);
+		int MM = prefs.getInt("MM", 10);
+		int DD = prefs.getInt("DD", 16);
+		int hh = prefs.getInt("hh", 17);
+		int mm = prefs.getInt("mm", 57);
+		int ss = prefs.getInt("ss", 11);
+		int unit = prefs.getInt("unit", 0);
+		int sys = prefs.getInt("sys", 120);
+		int dia = prefs.getInt("dia", 80);
+		int pulse = prefs.getInt("pulse", 70);
+		int bodyMovementFlag = prefs.getInt("bodyMovementFlag", 0);
+		int irregPulseFlag = prefs.getInt("irregPulseFlag", 0);
+		BPMeasurementData measurement = new BPMeasurementData(UNo, YY, MM,
+				DD, hh, mm, ss, unit, sys, dia, pulse, bodyMovementFlag, irregPulseFlag); // all values such as
+														// UNo, systolic or
+														// diastolic are
+														// supposed to be
+														// stored in the
+														// app's
+														// sharedpreferences
+														// everytime a
+														// measurement is
+														// grabbed from the
+														// BPM via Bluetooth
+		
+		return measurement;
 	}
 
 	@Override
@@ -177,15 +217,33 @@ public class UploadActivity extends Activity {
 		 * receiver that receives SMSs
 		 */
 		IntentFilter iff = new IntentFilter();
-		iff.addAction("android.provider.Telephony.SMS_RECEIVED");
-		this.registerReceiver(smsListenerUploadActivity, iff);
+		iff.addAction(SMS_RECEIVED);
+		this.registerReceiver(this.mSmsReceiver, iff);
+		
+		// to receive delivery report of sms
+        
+        IntentFilter if1 = new IntentFilter();
+        if1.addAction(SMS_SENT);
+        this.registerReceiver(this.sentReportReceiver, if1);
+
+        IntentFilter if2 = new IntentFilter();
+        if2.addAction(SMS_DELIVERED);
+        this.registerReceiver(this.deliveredReportReceiver, if2);
+        
+        /*
+		 * Checking the phone's key as well as server's key
+		 */
+		Log.w(TAG, "checking the server's key as well as the phone's key");
+		MyKeyUtils.checkKeys(getApplicationContext());
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
 		Log.w(TAG, "onPause");
-		this.unregisterReceiver(smsListenerUploadActivity);
+		this.unregisterReceiver(this.mSmsReceiver);
+		this.unregisterReceiver(this.sentReportReceiver);
+        this.unregisterReceiver(this.deliveredReportReceiver);
 	}
 
 	@Override

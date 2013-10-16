@@ -28,7 +28,8 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-import sg.edu.nus.omronhealth.R;
+import sg.edu.dukenus.bpmomron.R;
+
 import com.jwetherell.quick_response_code.camera.CameraManager;
 import com.google.zxing.ResultPoint;
 

@@ -16,7 +16,6 @@
 
 package com.jwetherell.quick_response_code.result;
 
-import sg.edu.nus.omronhealth.R;
 import com.google.zxing.client.result.CalendarParsedResult;
 import com.google.zxing.client.result.ParsedResult;
 
@@ -29,6 +28,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+
+import sg.edu.dukenus.bpmomron.R;
 
 /**
  * Handles calendar entries encoded in QR Codes.

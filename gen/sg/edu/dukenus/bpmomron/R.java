@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package sg.edu.nus.omronhealth;
+package sg.edu.dukenus.bpmomron;
 
 public final class R {
     public static final class array {

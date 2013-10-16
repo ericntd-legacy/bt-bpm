@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import sg.edu.dukenus.bpmomron.BluetoothSPPService;
 import sg.edu.dukenus.securesms.crypto.MyKeyUtils;
-import sg.edu.nus.omronhealth.R;
 import sg.edu.nus.omronhealth.db.BP_DAO;
 import sg.edu.nus.omronhealth.spp.BPMeasurementData;
 import sg.edu.nus.omronhealth.spp.OmronMeasurementData;
@@ -338,6 +337,17 @@ public class UpdateMeasurementActivity extends Activity {
 				OmronMeasurementData measurementData = msg.getData()
 						.getParcelable("testK");
 				BPMeasurementData test = (BPMeasurementData) measurementData;
+				
+				/*
+				 * Saving the latest measurement to the app's sharedpreferences
+				 * This is not tested as of 16/10/2013
+				 */
+				try {
+					saveMeasurement(test);
+				} catch (Exception e) {
+					Log.e(TAG, "exception happened, could not save measurement to SharedPreferences");
+				}
+				
 				Log.w(TAG, "parcelable: " + measurementData.toSmsHumanString()
 						+ " systolic is " + test.getSys());
 				// Log.e(TAG, "parcelable machine: " +
@@ -371,6 +381,27 @@ public class UpdateMeasurementActivity extends Activity {
 			}
 		}
 	};
+	
+	private void saveMeasurement(BPMeasurementData data) {
+		SharedPreferences prefs = getSharedPreferences("LatestMeasurement", Context.MODE_PRIVATE);
+		SharedPreferences.Editor prefsEditor = prefs.edit();
+		
+		prefsEditor.putString("UNo", ""+data.getUNo());
+		prefsEditor.putInt("YY", data.getYY());
+		prefsEditor.putInt("MM", data.getMM());
+		prefsEditor.putInt("DD", data.getDD());
+		prefsEditor.putInt("hh", data.getHh());
+		prefsEditor.putInt("mm", data.getMm());
+		prefsEditor.putInt("ss", data.getSs());
+		prefsEditor.putInt("unit", data.getUnit());
+		prefsEditor.putInt("sys", data.getSys());
+		prefsEditor.putInt("dia", data.getDia());
+		prefsEditor.putInt("pulse", data.getPulse());
+		prefsEditor.putInt("bodyMovementFlag", data.getBodyMovementFlag());
+		prefsEditor.putInt("irregPulseFlag", data.getIrregPulseFlag());
+		
+		prefsEditor.commit();
+	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (D)

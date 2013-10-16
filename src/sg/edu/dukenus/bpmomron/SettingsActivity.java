@@ -1,6 +1,5 @@
 package sg.edu.dukenus.bpmomron;
 
-import sg.edu.nus.omronhealth.R;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;

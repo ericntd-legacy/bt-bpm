@@ -19,7 +19,6 @@ import javax.crypto.NoSuchPaddingException;
 import sg.edu.dukenus.securesms.crypto.MyKeyUtils;
 import sg.edu.dukenus.securesms.sms.SmsReceiver;
 import sg.edu.dukenus.securesms.utils.MyUtils;
-import sg.edu.nus.omronhealth.R;
 
 import com.jwetherell.quick_response_code.DecoderActivity;
 

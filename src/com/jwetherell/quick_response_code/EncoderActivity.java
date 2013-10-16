@@ -14,6 +14,7 @@
 
 package com.jwetherell.quick_response_code;
 
+import sg.edu.dukenus.bpmomron.R;
 import android.view.Display;
 import android.view.WindowManager;
 import android.app.Activity;
@@ -23,7 +24,6 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import sg.edu.nus.omronhealth.R;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.jwetherell.quick_response_code.data.Contents;

@@ -16,8 +16,6 @@
 
 package com.jwetherell.quick_response_code.result;
 
-import sg.edu.nus.omronhealth.R;
-
 import com.google.zxing.client.result.AddressBookParsedResult;
 import com.google.zxing.client.result.ParsedResult;
 
@@ -32,6 +30,8 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import sg.edu.dukenus.bpmomron.R;
 
 /**
  * Handles address book entries.

@@ -23,7 +23,8 @@ import android.os.Message;
 import android.util.Log;
 
 import java.util.Map;
-import sg.edu.nus.omronhealth.R;
+
+import sg.edu.dukenus.bpmomron.R;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
