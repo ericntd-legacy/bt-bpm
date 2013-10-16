@@ -68,15 +68,15 @@ public class UploadActivity extends Activity {
 
 	// intent
 	final String UPLOAD_FROM_DB = "UploadFromDB";
-	
-	private SmsReceiver mSmsReceiver;
-    private SmsReceiver sentReportReceiver;
-    private SmsReceiver deliveredReportReceiver;
 
-    // actions/ intent filters
-    private final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
-    private final String SMS_SENT = "SMS_SENT";
-    private final String SMS_DELIVERED = "SMS_DELIVERED";
+	private SmsReceiver mSmsReceiver;
+	private SmsReceiver sentReportReceiver;
+	private SmsReceiver deliveredReportReceiver;
+
+	// actions/ intent filters
+	private final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+	private final String SMS_SENT = "SMS_SENT";
+	private final String SMS_DELIVERED = "SMS_DELIVERED";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,20 +87,19 @@ public class UploadActivity extends Activity {
 		/*
 		 * Check existing public keys of the server +6584781395
 		 */
-		/*SharedPreferences prefs1 = getSharedPreferences(
-				MyKeyUtils.DEFAULT_CONTACT_NUM, Context.MODE_PRIVATE);
-		String contactPubMod = prefs1.getString(MyKeyUtils.PREF_PUBLIC_MOD,
-				MyKeyUtils.DEFAULT_PREF);
-		String contactPubExp = prefs1.getString(MyKeyUtils.PREF_PUBLIC_EXP,
-				MyKeyUtils.DEFAULT_PREF);
-		if (!contactPubMod.isEmpty() && !contactPubExp.isEmpty()) {
-			Log.i(TAG, "public key stored for "
-					+ MyKeyUtils.DEFAULT_CONTACT_NUM + " with mod: "
-					+ contactPubMod + " and exp: " + contactPubExp);
-		} else {
-			Log.w(TAG, "public key not found for "
-					+ MyKeyUtils.DEFAULT_CONTACT_NUM + " so where did it go?");
-		}*/
+		/*
+		 * SharedPreferences prefs1 = getSharedPreferences(
+		 * MyKeyUtils.DEFAULT_CONTACT_NUM, Context.MODE_PRIVATE); String
+		 * contactPubMod = prefs1.getString(MyKeyUtils.PREF_PUBLIC_MOD,
+		 * MyKeyUtils.DEFAULT_PREF); String contactPubExp =
+		 * prefs1.getString(MyKeyUtils.PREF_PUBLIC_EXP,
+		 * MyKeyUtils.DEFAULT_PREF); if (!contactPubMod.isEmpty() &&
+		 * !contactPubExp.isEmpty()) { Log.i(TAG, "public key stored for " +
+		 * MyKeyUtils.DEFAULT_CONTACT_NUM + " with mod: " + contactPubMod +
+		 * " and exp: " + contactPubExp); } else { Log.w(TAG,
+		 * "public key not found for " + MyKeyUtils.DEFAULT_CONTACT_NUM +
+		 * " so where did it go?"); }
+		 */
 
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -114,20 +113,20 @@ public class UploadActivity extends Activity {
 			EditText phoneNum = (EditText) findViewById(R.id.phoneNum);
 			phoneNum.setText(desNumStored);
 		}
-		
+
 		// TODO check if keys available for such number
 
 		prepareMeasurements();
-		
+
 		mSmsReceiver = new SmsReceiver();
-        sentReportReceiver = new SmsReceiver();
-        deliveredReportReceiver = new SmsReceiver();
+		sentReportReceiver = new SmsReceiver();
+		deliveredReportReceiver = new SmsReceiver();
 	}
-	
+
 	private void prepareMeasurements() {
 		// Get the message from the intent
-				Intent intent = getIntent();
-				String act = intent.getAction();
+		Intent intent = getIntent();
+		String act = intent.getAction();
 		/*
 		 * if the measurement is retrieved directly from the app's
 		 * sharedpreferences
@@ -141,9 +140,9 @@ public class UploadActivity extends Activity {
 			// TODO: manually construct measurement data from the app's
 			// sharedpreferences
 			measurementDataList = new ArrayList<OmronMeasurementData>();
-			
+
 			BPMeasurementData measurement = retrieveLatestMeasurement();
-			
+
 			measurementDataList.add(measurement);
 			setup();
 			mConversationArrayAdapter.add(measurement.toString());
@@ -170,10 +169,11 @@ public class UploadActivity extends Activity {
 			}
 		}
 	}
-	
+
 	private BPMeasurementData retrieveLatestMeasurement() {
-		SharedPreferences prefs = getSharedPreferences("LatestMeasurement", Context.MODE_PRIVATE);
-		
+		SharedPreferences prefs = getSharedPreferences("LatestMeasurement",
+				Context.MODE_PRIVATE);
+
 		char UNo = prefs.getString("UNo", "A").charAt(0);
 		int YY = prefs.getInt("YY", 12);
 		int MM = prefs.getInt("MM", 10);
@@ -187,19 +187,20 @@ public class UploadActivity extends Activity {
 		int pulse = prefs.getInt("pulse", 70);
 		int bodyMovementFlag = prefs.getInt("bodyMovementFlag", 0);
 		int irregPulseFlag = prefs.getInt("irregPulseFlag", 0);
-		BPMeasurementData measurement = new BPMeasurementData(UNo, YY, MM,
-				DD, hh, mm, ss, unit, sys, dia, pulse, bodyMovementFlag, irregPulseFlag); // all values such as
-														// UNo, systolic or
-														// diastolic are
-														// supposed to be
-														// stored in the
-														// app's
-														// sharedpreferences
-														// everytime a
-														// measurement is
-														// grabbed from the
-														// BPM via Bluetooth
-		
+		BPMeasurementData measurement = new BPMeasurementData(UNo, YY, MM, DD,
+				hh, mm, ss, unit, sys, dia, pulse, bodyMovementFlag,
+				irregPulseFlag); // all values such as
+		// UNo, systolic or
+		// diastolic are
+		// supposed to be
+		// stored in the
+		// app's
+		// sharedpreferences
+		// everytime a
+		// measurement is
+		// grabbed from the
+		// BPM via Bluetooth
+
 		return measurement;
 	}
 
@@ -219,18 +220,18 @@ public class UploadActivity extends Activity {
 		IntentFilter iff = new IntentFilter();
 		iff.addAction(SMS_RECEIVED);
 		this.registerReceiver(this.mSmsReceiver, iff);
-		
-		// to receive delivery report of sms
-        
-        IntentFilter if1 = new IntentFilter();
-        if1.addAction(SMS_SENT);
-        this.registerReceiver(this.sentReportReceiver, if1);
 
-        IntentFilter if2 = new IntentFilter();
-        if2.addAction(SMS_DELIVERED);
-        this.registerReceiver(this.deliveredReportReceiver, if2);
-        
-        /*
+		// to receive delivery report of sms
+
+		IntentFilter if1 = new IntentFilter();
+		if1.addAction(SMS_SENT);
+		this.registerReceiver(this.sentReportReceiver, if1);
+
+		IntentFilter if2 = new IntentFilter();
+		if2.addAction(SMS_DELIVERED);
+		this.registerReceiver(this.deliveredReportReceiver, if2);
+
+		/*
 		 * Checking the phone's key as well as server's key
 		 */
 		Log.w(TAG, "checking the server's key as well as the phone's key");
@@ -243,7 +244,7 @@ public class UploadActivity extends Activity {
 		Log.w(TAG, "onPause");
 		this.unregisterReceiver(this.mSmsReceiver);
 		this.unregisterReceiver(this.sentReportReceiver);
-        this.unregisterReceiver(this.deliveredReportReceiver);
+		this.unregisterReceiver(this.deliveredReportReceiver);
 	}
 
 	@Override
@@ -423,10 +424,11 @@ public class UploadActivity extends Activity {
 		RSAPublicKeySpec pubKeySpec = MyKeyUtils.getRecipientsPublicKey(
 				contactNum, getApplicationContext());
 		if (pubKeySpec == null) {
-			Toast.makeText(getApplicationContext(),
-					"contact's key not found, requesting for it",
+			Toast.makeText(
+					getApplicationContext(),
+					"Key not found, please double-check server's number. Server's number must contain the plus sign, country code and no space in between",
 					Toast.LENGTH_LONG).show();
-			Log.e(TAG, "contact's key not found, requesting for it");
+			Log.e(TAG, "Key not found, please double-check server's number");
 		} else {
 			sendSecureSMS();
 		}
@@ -441,7 +443,7 @@ public class UploadActivity extends Activity {
 
 		EditText phoneNumberField = (EditText) findViewById(R.id.phoneNum);
 		String contactNum = phoneNumberField.getText().toString();
-		Log.w(TAG, "server's number is "+contactNum);
+		Log.w(TAG, "server's number is " + contactNum);
 
 		// String idStored = preferences.getString("deviceId", "NO_ID");
 		BPMeasurementData tmp = null;
@@ -476,7 +478,7 @@ public class UploadActivity extends Activity {
 
 		// Toast.makeText(this, msg + "  length: " + msg.length(),
 		// Toast.LENGTH_LONG).show();
-		if (contactNum!=null||!contactNum.isEmpty()) {
+		if (contactNum != null || !contactNum.isEmpty()) {
 			smsSender = new SmsSender(contactNum);
 			smsSender.sendSecureSMS(getApplicationContext(), measurementStr);
 		}
