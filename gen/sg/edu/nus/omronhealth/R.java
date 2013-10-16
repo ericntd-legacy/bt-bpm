@@ -45,6 +45,7 @@ public final class R {
     public static final class id {
         public static final int CheckboxEnableLegacySMS=0x7f070017;
         public static final int LabelSMSFormat=0x7f070020;
+        public static final int OptionUploadLatest=0x7f070039;
         public static final int TableSettings=0x7f07000b;
         /**  Messages IDs 
          */

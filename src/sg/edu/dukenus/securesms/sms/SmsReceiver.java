@@ -16,16 +16,21 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import sg.edu.dukenus.bpmomron.MainActivity;
+
 //import org.apache.commons.codec.binary.Base64;
 import android.util.Base64;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SmsReceiver extends BroadcastReceiver {
 	// debugging
@@ -47,27 +52,112 @@ public class SmsReceiver extends BroadcastReceiver {
 	private final String KEY_EXCHANGE_CODE = "keyx";
 	private final String HEALTH_SMS = "gmstelehealth";
 
+	// actions/ intent filters
+	private final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+	private final String SMS_SENT = "SMS_SENT";
+	private final String SMS_DELIVERED = "SMS_DELIVERED";
+	
+	//private int msgProcessedCount = 0;
+
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Map<String, String> msg = retrieveMessages(intent);
+		String action = intent.getAction();
+		if (action.equals(SMS_RECEIVED)) {
+			//Log.w(TAG, "messages processed count "+msgProcessedCount);
+			/*
+			 * updating a sharedpreferences boolean value, hopefully the UI
+			 * activity can see the updated value after that
+			 */
 
-		Log.i(TAG, "we received " + msg.size() + " messages in total");
-		if (msg != null) {
-			for (String sender : msg.keySet()) {
-				String message = msg.get(sender);
+			SharedPreferences prefs = context.getSharedPreferences("prefs",
+					Context.MODE_PRIVATE);
+			SharedPreferences.Editor prefseditor = prefs.edit();
+			prefseditor.putBoolean("receivedsms", true);
+			prefseditor.commit();
 
-				Log.i(TAG, "message received is " + message);
+			Map<String, String> msg = retrieveMessages(intent);
 
-				handleMessage(message, sender, context);
+			Log.w(TAG, "we received " + msg.size() + " messages in total");
+			/*if (msgProcessedCount==msg.size()) {
+				Log.w(TAG, "already processed the multipart message(s)");
+				msgProcessedCount = 0;
+				return;
+			}*/
+			if (msg != null) {
+				String sender = "";
+				String message = "";
+				for (String tmp : msg.keySet()) {
+					message = msg.get(tmp);
+
+					Log.w(TAG, "message received is " + message);
+					// Toast.makeText(context, "Received message: "+message,
+					// Toast.LENGTH_SHORT);
+					sender = tmp;
+					
+					handleMessage(message, sender, context, intent);
+				}
+				//msgProcessedCount++;
 			}
+		} else if (action.equals(SMS_SENT)) {
+			Log.w(TAG, "received sent sms report");
+			handleSentSms(context);
+		} else if (action.equals(SMS_DELIVERED)) {
+			Log.w(TAG, "received delivered sms report");
+			handleDeliveredSms(context);
 		}
 
 	}
 
-	private void handleMessage(String message, String sender, Context context) {
+	private void handleSentSms(Context context) {
+		switch (getResultCode()) {
+		case Activity.RESULT_OK:
+			Log.w(TAG, "SMS sent");
+			Toast.makeText(context, "SMS sent", Toast.LENGTH_SHORT).show();
+
+			// TextView debug = (TextView) findViewById(R.id.DebugMessages);
+			// debug.append("SMS sent");
+			break;
+		case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+			Toast.makeText(context, "Generic failure", Toast.LENGTH_SHORT)
+					.show();
+			Log.w(TAG, "Generic failure");
+			break;
+		case SmsManager.RESULT_ERROR_NO_SERVICE:
+			Toast.makeText(context, "No service", Toast.LENGTH_SHORT).show();
+			Log.w(TAG, "No service");
+			break;
+		case SmsManager.RESULT_ERROR_NULL_PDU:
+			Toast.makeText(context, "Null PDU", Toast.LENGTH_SHORT).show();
+			Log.w(TAG, "Null PDU");
+			break;
+		case SmsManager.RESULT_ERROR_RADIO_OFF:
+			Toast.makeText(context, "Radio off", Toast.LENGTH_SHORT).show();
+			Log.w(TAG, "Radio off");
+			break;
+		}
+	}
+
+	private void handleDeliveredSms(Context context) {
+		switch (getResultCode()) {
+		case Activity.RESULT_OK:
+			Log.w(TAG, "SMS delivered");
+			Toast.makeText(context, "SMS delivered", Toast.LENGTH_SHORT).show();
+
+			// TextView debug = (TextView) findViewById(R.id.DebugMessages);
+			// debug.append("SMS sent");
+			break;
+		case Activity.RESULT_CANCELED:
+			Toast.makeText(context, "SMS not delivered", Toast.LENGTH_SHORT)
+					.show();
+			Log.w(TAG, "SMS not delivered");
+			break;
+		}
+	}
+
+	private void handleMessage(String message, String sender, Context context, Intent i) {
 		if (message.startsWith(KEY_EXCHANGE_CODE)) {
 			Log.i(TAG, "message received is a key exchange message");
-			handleKeyExchangeMsg(message, sender, context);
+			handleKeyExchangeMsg(message, sender, context, i);
 		} else if (message.startsWith(HEALTH_SMS)) {
 			Log.i(TAG, "received a secure text message");
 			// TODO handle secure text message
@@ -84,11 +174,13 @@ public class SmsReceiver extends BroadcastReceiver {
 	 * decrypt the messages upon receiving them
 	 */
 	private void handleKeyExchangeMsg(String message, String sender,
-			Context context) {
+			Context context, Intent i) {
 		// TODO get the modulus and exponent of the public key of the sender &
 		// reconstruct the public key
 		String contactNum = sender;
-		String[] parts = message.split(" "); // expected structure of the key exchange message: "keyx modBase64Encoded expBase64Encoded"
+		String[] parts = message.split(" "); // expected structure of the key
+												// exchange message:
+												// "keyx modBase64Encoded expBase64Encoded"
 		if (parts.length == 3) {
 			String recipientPubModBase64Str = parts[1];
 			String recipientPubExpBase64Str = parts[2];
@@ -104,7 +196,8 @@ public class SmsReceiver extends BroadcastReceiver {
 			 */
 
 			byte[] recipientPubModBA = Base64.decode(recipientPubModBase64Str,
-					Base64.DEFAULT); // TODO to decide whether to use NO_WRAP or NO_PADDING here
+					Base64.DEFAULT); // TODO to decide whether to use NO_WRAP or
+										// NO_PADDING here
 			byte[] recipientPubExpBA = Base64.decode(recipientPubExpBase64Str,
 					Base64.DEFAULT);
 			BigInteger recipientPubMod = new BigInteger(recipientPubModBA);
@@ -130,6 +223,17 @@ public class SmsReceiver extends BroadcastReceiver {
 							+ prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF)
 							+ " and exponent "
 							+ prefs.getString(PREF_PUBLIC_EXP, PREF_PUBLIC_EXP));
+			Toast.makeText(context, "Ready to send secure message to "+contactNum, Toast.LENGTH_LONG).show();
+			// call the UI Activity to verify that the updated sharedpreferences are available for its us
+			int activitySwitch = 1;
+			if (activitySwitch == 1) {
+				//MainActivity.onPublicKeyReceived(i, contactNum, context); // without
+																	// calling
+				// this the activity UI won't see the updated
+				// SharedPreferences
+			} else if (activitySwitch == 2) {
+
+			}
 		} else {
 			Log.e(TAG,
 					"something is wrong with the key exchange message, it's supposed to have 3 parts: the code 'keyx', the modulus and the exponent");
@@ -144,8 +248,8 @@ public class SmsReceiver extends BroadcastReceiver {
 		if (parts.length == 2) {
 
 			// TODO get the private key of the intended recipient
-			SharedPreferences prefs = context.getSharedPreferences(
-					PREFS, Context.MODE_PRIVATE);
+			SharedPreferences prefs = context.getSharedPreferences(PREFS,
+					Context.MODE_PRIVATE);
 
 			String privateMod = prefs.getString(PREF_PRIVATE_MOD, DEFAULT_PREF);
 			String priavteExp = prefs.getString(PREF_PRIVATE_EXP, DEFAULT_PREF);
@@ -260,20 +364,18 @@ public class SmsReceiver extends BroadcastReceiver {
 		return msg;
 	}
 
-	/*private void verifyRecipientsPublicKey(String mod, String exp,
-			Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(PREFS_RECIPIENT,
-				Context.MODE_PRIVATE);
-
-		String storedRecipientsPublicMod = prefs.getString(PREF_PUBLIC_MOD,
-				DEFAULT_PREF);
-		String storedRecipientsPublicExp = prefs.getString(PREF_PUBLIC_EXP,
-				DEFAULT_PREF);
-
-		boolean result = (mod.equals(storedRecipientsPublicMod) && exp
-				.equals(storedRecipientsPublicExp));
-		Log.w(TAG,
-				"the recipient's public key received is the same as it was generated "
-						+ result);
-	}*/
+	/*
+	 * private void verifyRecipientsPublicKey(String mod, String exp, Context
+	 * context) { SharedPreferences prefs =
+	 * context.getSharedPreferences(PREFS_RECIPIENT, Context.MODE_PRIVATE);
+	 * 
+	 * String storedRecipientsPublicMod = prefs.getString(PREF_PUBLIC_MOD,
+	 * DEFAULT_PREF); String storedRecipientsPublicExp =
+	 * prefs.getString(PREF_PUBLIC_EXP, DEFAULT_PREF);
+	 * 
+	 * boolean result = (mod.equals(storedRecipientsPublicMod) && exp
+	 * .equals(storedRecipientsPublicExp)); Log.w(TAG,
+	 * "the recipient's public key received is the same as it was generated " +
+	 * result); }
+	 */
 }

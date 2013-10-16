@@ -17,6 +17,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import sg.edu.dukenus.securesms.crypto.MyKeyUtils;
+import sg.edu.dukenus.securesms.sms.SmsReceiver;
 import sg.edu.dukenus.securesms.utils.MyUtils;
 import sg.edu.nus.omronhealth.R;
 
@@ -41,9 +42,11 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 	// debugging
 	protected final boolean D = true;
-	private final String TAG = "MainActivity";
+	private final static String TAG = "MainActivity";
 
-
+	// broadcast receivers
+	private SmsReceiver mSmsReceiver;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,8 +57,16 @@ public class MainActivity extends Activity {
 		 * register the receiver of "sent" and "delivered" statuses of sms
 		 */
 		registerReceivers();
-
-		MyKeyUtils.checkKeys(getApplicationContext());
+		
+		/*
+		 * clear the server's key for testing purpose
+		 */
+		/*SharedPreferences prefs = getSharedPreferences("+6584781395", Context.MODE_PRIVATE);
+		SharedPreferences.Editor prefsEditor = prefs.edit();
+		prefsEditor.clear();
+		prefsEditor.commit();*/
+		
+		mSmsReceiver = new SmsReceiver();
 
 	}
 
@@ -72,16 +83,23 @@ public class MainActivity extends Activity {
 		/*
 		 * receiver that receives SMSs
 		 */
+		Log.w(TAG, "registering SMS receiver");
 		IntentFilter iff = new IntentFilter();
 		iff.addAction("android.provider.Telephony.SMS_RECEIVED");
-		this.registerReceiver(mBroadcastReceiver, iff);
+		this.registerReceiver(this.mSmsReceiver, iff);
+		
+		/*
+		 * Checking the phone's key as well as server's key
+		 */
+		Log.w(TAG, "checking the server's key as well as the phone's key");
+		MyKeyUtils.checkKeys(getApplicationContext());
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		this.unregisterReceiver(mBroadcastReceiver);
 		Log.w(TAG, "onPause");
+		this.unregisterReceiver(this.mSmsReceiver);
 
 	}
 
@@ -201,26 +219,26 @@ public class MainActivity extends Activity {
 	 * like a service or asynctask has to request for the key from the server
 	 * first of course
 	 */
-	public void onPublicKeyReceived(Intent i, String contactNum) {
-		Log.w(TAG, "MainActivity -");
+	public static void onPublicKeyReceived(Intent i, String contact, Context context) {
+		Log.w(TAG, ">> onPublicKeyReceived()");
 		// SmsReceiver will try to trigger this
 		// Log.w(TAG, "it goes here but did the activity restart?");
-		SharedPreferences prefs = getSharedPreferences(contactNum,
+		/*SharedPreferences prefs = context.getSharedPreferences(contact,
 				Context.MODE_PRIVATE);
 		String pubMod = prefs.getString(MyKeyUtils.PREF_PUBLIC_MOD,
 				MyKeyUtils.DEFAULT_PREF);
 
 		Log.w(TAG,
-				"public key found for contact "
-						+ contactNum
+				"public key updated for contact "
+						+ contact
 						+ " "
-						+ (MyKeyUtils.getRecipientsPublicKey(contactNum,
-								getApplicationContext()) != null));
-		Toast.makeText(getApplicationContext(), "Ready to send secure message to "+contactNum,
-				Toast.LENGTH_SHORT).show();
+						+ (MyKeyUtils.getRecipientsPublicKey(contact,
+								context.getApplicationContext()) != null));
+		Toast.makeText(context.getApplicationContext(), "Ready to send secure message to "+contact,
+				Toast.LENGTH_SHORT).show();*/
 	}
 
-	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	/*private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		// SharedPreferences
 		//private final String PREFS = "MyKeys";
 		//private final String PREF_PUBLIC_MOD = "PublicModulus";
@@ -279,12 +297,12 @@ public class MainActivity extends Activity {
 			}
 		}
 
-		/*
+		
 		 * the sender here is actually the recipient of future encrypted text
 		 * messages the recipient's public key will be used to encrypt the
 		 * future text messages so that the recipient can use his/ her private
 		 * key to decrypt the messages upon receiving them
-		 */
+		 
 		private void handleKeyExchangeMsg(String message, String sender,
 				Context context, Intent i) {
 			Toast.makeText(context, "got a key exchange message",
@@ -303,15 +321,15 @@ public class MainActivity extends Activity {
 				String recipientPubModBase64Str = parts[1];
 				String recipientPubExpBase64Str = parts[2];
 
-				/*
+				
 				 * ================================ for testing only - to be
 				 * removed later
-				 */
+				 
 				// verifyRecipientsPublicKey(recipientPubModBase64Str,recipientPubExpBase64Str,
 				// context);
-				/*
+				
 				 * ================================
-				 */
+				 
 
 				byte[] recipientPubModBA = Base64.decode(
 						recipientPubModBase64Str, Base64.DEFAULT); // TODO to
@@ -355,17 +373,17 @@ public class MainActivity extends Activity {
 						Toast.LENGTH_LONG).show();
 
 				// TODO inform the UI Activity that public key is received
-				MainActivity.this.onPublicKeyReceived(i, contactNum);
+				MainActivity.onPublicKeyReceived(i, contactNum, getApplicationContext());
 
 				// TODO reload MainActivity so that it can read updated
 				// sharedpreferences
-				/*
+				
 				 * Log.w(TAG, "restarting MainActivity"); Intent intent = new
 				 * Intent(); intent.setClassName("sg.edu.dukenus.securesms",
 				 * "sg.edu.dukenus.securesms.MainActivity");
 				 * intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				 * context.startActivity(intent);
-				 */
+				 
 
 				// TODO handle a pending list of message to be sent securely due
 				// to lack of key
@@ -505,6 +523,6 @@ public class MainActivity extends Activity {
 
 			return msg;
 		}
-	};
+	};*/
 
 }

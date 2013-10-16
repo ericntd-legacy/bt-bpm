@@ -107,8 +107,14 @@ public class MyKeyUtils {
 					+ " with modulus " + pubMod + " and exponent " + pubExp);
 			byte[] pubModBA = Base64.decode(pubMod, Base64.DEFAULT);
 			byte[] pubExpBA = Base64.decode(pubExp, Base64.DEFAULT);
-			BigInteger pubModBI = new BigInteger(pubModBA);
-			BigInteger pubExpBI = new BigInteger(pubExpBA);
+			BigInteger pubModBI = new BigInteger(1, pubModBA); // 1 is added as
+																// an attempt to
+																// deal with
+																// com.android.org.bouncycastle.crypto.DataLengthException:
+																// input too
+																// large for RSA
+																// cipher
+			BigInteger pubExpBI = new BigInteger(1, pubExpBA);
 			Log.i(TAG, "public modulus is " + pubModBI
 					+ " and public exponent is " + pubExpBI + " in base 256 "
 					+ pubModBA + " " + pubExpBA);
@@ -129,6 +135,7 @@ public class MyKeyUtils {
 	public static byte[] encryptMsg(String msg, RSAPublicKeySpec pubKeySpec) {
 		if (msg != null && pubKeySpec != null && !msg.isEmpty()) {
 			try {
+				Log.w(TAG, "msg is: " + msg + " with length " + msg.length());
 				KeyFactory fact = KeyFactory.getInstance("RSA");
 
 				PublicKey pubKey = fact.generatePublic(pubKeySpec);
@@ -197,7 +204,7 @@ public class MyKeyUtils {
 			keysExist = false;
 		}
 		if (!keysExist) {
-			Log.w(TAG, "keys not found, generating");
+			// Log.w(TAG, ">> getKeys() - keys not found, generating");
 			return generateKeys(keySize, context);
 
 		} else {
@@ -213,16 +220,19 @@ public class MyKeyUtils {
 			BigInteger myPrivateModBI = new BigInteger(myPrivateModBA);
 			BigInteger myPrivateExpBI = new BigInteger(myPrivateExpBA);
 
-			Log.w(TAG, "the current user's stored public key modulus is "
-					+ myPubModBI + " while the exponent is " + myPubExpBI
-					+ " === private key modulus is " + myPrivateModBI
-					+ " and exponent is " + myPrivateExpBI);
+			/*
+			 * Log.w(TAG, "the current user's stored public key modulus is " +
+			 * myPubModBI + " while the exponent is " + myPubExpBI +
+			 * " === private key modulus is " + myPrivateModBI +
+			 * " and exponent is " + myPrivateExpBI);
+			 */
+			// Log.w(TAG, ">> getKeys() - user's own key found");
 			return true;
 		}
 	}
 
 	public static boolean generateKeys(int keySize, Context context) {
-		Log.i(TAG, "keys not found, generating now");
+		Log.i(TAG, ">> generateKeys() - generating user's own keys now");
 		try {
 
 			/*
@@ -345,18 +355,18 @@ public class MyKeyUtils {
 	}
 
 	public static void requestForKey(String contactNum, Context context) {
-		Log.w(TAG, "hey why is this not running?");
+		// Log.w(TAG, "hey why is this not running?");
 		// get user's own keys
 		boolean keys = MyKeyUtils.getKeys(DEFAULT_KEY_SIZE, context);
 
 		if (keys) {
-			Log.w(TAG, "user's own keys found");
+			Log.w(TAG, ">> requestForKey() - user's own keys found");
 			SmsSender smsSender = new SmsSender(contactNum);
 
 			smsSender.sendKeyExchangeSMS(context);
 		} else {
 			Log.e(TAG,
-					"could not find exisiting keys or generate new keys of user's own");
+					">> requestForKey() - could not find exisiting keys or generate new keys of user's own");
 		}
 
 	}
@@ -370,8 +380,10 @@ public class MyKeyUtils {
 				SettingsActivity.PREF_BPM, Context.MODE_PRIVATE);
 		String setServerNum = prefs1.getString(SettingsActivity.PREF_DES_NUM,
 				"");
-		Log.w(TAG, "checking whether a key is stored for " + setServerNum);
-		//SharedPreferences prefs = context.getSharedPreferences(setServerNum, Context.MODE_PRIVATE);
+		Log.w(TAG, ">> checkKeys() - checking whether a key is stored for "
+				+ setServerNum);
+		// SharedPreferences prefs = context.getSharedPreferences(setServerNum,
+		// Context.MODE_PRIVATE);
 
 		/*
 		 * Clear the sharedpreferences for testing
@@ -384,27 +396,24 @@ public class MyKeyUtils {
 		 */
 		/***********************************************/
 		if (!setServerNum.isEmpty()) {
-			RSAPublicKeySpec pubKeySpec = getRecipientsPublicKey(
-					setServerNum, context);
+			RSAPublicKeySpec pubKeySpec = getRecipientsPublicKey(setServerNum,
+					context);
 
 			if (pubKeySpec != null) {
-				Log.w(TAG,
-						"public key stored for "
-								+ setServerNum
-								+ " with mod: "
-								+ getPubMod(setServerNum,
-										context)
-								+ " and exp: "
-								+ getPubExp(setServerNum,
-										context));
+				/*
+				 * Log.w(TAG, ">> checkKeys() - public key stored for " +
+				 * setServerNum + " with mod: " + getPubMod(setServerNum,
+				 * context) + " and exp: " + getPubExp(setServerNum, context));
+				 */
+				Log.w(TAG, "Ready to send secure messages to " + setServerNum);
 				// Notify users they they are all set to send secure messages
 				Toast.makeText(context,
 						"Ready to send secure messages to " + setServerNum,
 						Toast.LENGTH_SHORT).show();
 
 			} else {
-				Log.w(TAG, "Can't send secure messages to " + setServerNum
-						+ ", requesting for key!");
+				Log.w(TAG, ">> checkKeys() - Can't send secure messages to "
+						+ setServerNum + ", requesting for key!");
 				Toast.makeText(
 						context,
 						"Can't send secure messages to " + setServerNum
@@ -415,7 +424,8 @@ public class MyKeyUtils {
 				task.execute();
 			}
 		} else {
-			Log.w(TAG, "Destination phone number not set, nothing to do");
+			Log.w(TAG,
+					">> checkKeys() - Destination phone number not set, nothing to do");
 		}
 	}
 

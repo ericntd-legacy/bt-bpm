@@ -105,7 +105,7 @@ public class SmsSender {
 			Context context) {
 		if (mod.length() != 0 && exp.length() != 0) {
 			String msg = "keyx " + mod + " " + exp;
-			Log.i(TAG, "Sending key exchange sms: '" + msg + "' with length: "+msg.length() + " to "+recipient);
+			Log.w(TAG, ">> sendKeyExchangeSMS() - Sending key exchange sms: '" + msg + "' with length: "+msg.length() + " to "+recipient);
 			
 			this.recipientNum = recipient;
 			this.message = msg;
@@ -140,7 +140,7 @@ public class SmsSender {
 			if (pubMod.length() != 0 && pubExp.length() != 0) {
 				sendKeyExchangeSMS(this.recipientNum, pubMod, pubExp, context);
 			} else {
-				Log.w(TAG, "mod or exp of public key not found");
+				Log.e(TAG, "mod or exp of public key not found");
 				MyUtils.alert("key not found, please generate first", context);
 			}
 		}

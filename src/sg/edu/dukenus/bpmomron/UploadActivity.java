@@ -66,64 +66,109 @@ public class UploadActivity extends Activity {
 	private ArrayAdapter<String> mConversationArrayAdapter;
 	private ArrayList<OmronMeasurementData> measurementDataList;
 
+	// intent
+	final String UPLOAD_FROM_DB = "UploadFromDB";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.w(TAG, "onCreate");
 		setContentView(R.layout.activity_upload);
-		
-		
+
+		// Get the message from the intent
+		Intent intent = getIntent();
+		String act = intent.getAction();
+
 		/*
 		 * Check existing public keys of the server +6584781395
 		 */
-		SharedPreferences prefs1 = getSharedPreferences(MyKeyUtils.DEFAULT_CONTACT_NUM, Context.MODE_PRIVATE);
-		String contactPubMod = prefs1.getString(MyKeyUtils.PREF_PUBLIC_MOD, MyKeyUtils.DEFAULT_PREF);
-		String contactPubExp = prefs1.getString(MyKeyUtils.PREF_PUBLIC_EXP, MyKeyUtils.DEFAULT_PREF);
-		if (!contactPubMod.isEmpty()&&!contactPubExp.isEmpty()) {
-			Log.i(TAG, "public key stored for "+MyKeyUtils.DEFAULT_CONTACT_NUM+" with mod: "+contactPubMod+" and exp: "+contactPubExp);
+		SharedPreferences prefs1 = getSharedPreferences(
+				MyKeyUtils.DEFAULT_CONTACT_NUM, Context.MODE_PRIVATE);
+		String contactPubMod = prefs1.getString(MyKeyUtils.PREF_PUBLIC_MOD,
+				MyKeyUtils.DEFAULT_PREF);
+		String contactPubExp = prefs1.getString(MyKeyUtils.PREF_PUBLIC_EXP,
+				MyKeyUtils.DEFAULT_PREF);
+		if (!contactPubMod.isEmpty() && !contactPubExp.isEmpty()) {
+			Log.i(TAG, "public key stored for "
+					+ MyKeyUtils.DEFAULT_CONTACT_NUM + " with mod: "
+					+ contactPubMod + " and exp: " + contactPubExp);
 		} else {
-			Log.w(TAG, "public key not found for "+MyKeyUtils.DEFAULT_CONTACT_NUM+" so where did it go?");
+			Log.w(TAG, "public key not found for "
+					+ MyKeyUtils.DEFAULT_CONTACT_NUM + " so where did it go?");
 		}
-		
-		
+
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREF_BPM,
-				Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences(
+				SettingsActivity.PREF_BPM, Context.MODE_PRIVATE);
 
-		String desNumStored = prefs.getString(SettingsActivity.PREF_DES_NUM, "");
+		String desNumStored = prefs
+				.getString(SettingsActivity.PREF_DES_NUM, "");
 
 		if (!desNumStored.isEmpty()) {
 			EditText phoneNum = (EditText) findViewById(R.id.phoneNum);
 			phoneNum.setText(desNumStored);
 		}
-		
-		measurementDataList = getIntent().getParcelableArrayListExtra(
-				UpdateMeasurementActivity.MEASUREMENT_DATA_ARRAY);
 
-		setup();
-		
-		if (!measurementDataList.isEmpty()) {
-			// enable send btns
-			Button normalSms = (Button) findViewById(R.id.btn_normalSms);
+		/*
+		 * if the measurement is retrieved directly from the app's
+		 * sharedpreferences
+		 */
+		if (act.equals(UpdateMeasurementActivity.UPLOAD_FROM_DB)) {
+			Log.w(TAG,
+					"getting the latest measurement directly from the app's sharedpreferences");
 			Button encodedSms = (Button) findViewById(R.id.btn_encodedSms);
-
-			normalSms.setEnabled(true);
 			encodedSms.setEnabled(true);
 
-		}
-		for (OmronMeasurementData measurementData : measurementDataList) {
+			// TODO: manually construct measurement data from the app's
+			// sharedpreferences
+			measurementDataList = new ArrayList<OmronMeasurementData>();
+			BPMeasurementData measurement = new BPMeasurementData('A', 13, 10,
+					16, 17, 57, 11, 0, 130, 80, 70, 0, 0); // all values such as
+															// UNo, systolic or
+															// diastolic are
+															// supposed to be
+															// stored in the
+															// app's
+															// sharedpreferences
+															// everytime a
+															// measurement is
+															// grabbed from the
+															// BPM via Bluetooth
+			measurementDataList.add(measurement);
+			setup();
+			mConversationArrayAdapter.add(measurement.toString());
 
-			mConversationArrayAdapter.add(measurementData.toString());
+		} else {
+
+			measurementDataList = getIntent().getParcelableArrayListExtra(
+					UpdateMeasurementActivity.MEASUREMENT_DATA_ARRAY);
+
+			setup();
+
+			if (!measurementDataList.isEmpty()) {
+				// enable send btns
+				Button normalSms = (Button) findViewById(R.id.btn_normalSms);
+				Button encodedSms = (Button) findViewById(R.id.btn_encodedSms);
+
+				normalSms.setEnabled(true);
+				encodedSms.setEnabled(true);
+
+			}
+			for (OmronMeasurementData measurementData : measurementDataList) {
+
+				mConversationArrayAdapter.add(measurementData.toString());
+			}
 		}
 
 	}
-	
+
 	@Override
 	public void onStart() {
 		super.onStart();
 		Log.w(TAG, "onStart");
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -135,20 +180,20 @@ public class UploadActivity extends Activity {
 		iff.addAction("android.provider.Telephony.SMS_RECEIVED");
 		this.registerReceiver(smsListenerUploadActivity, iff);
 	}
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
 		Log.w(TAG, "onPause");
 		this.unregisterReceiver(smsListenerUploadActivity);
 	}
-	
+
 	@Override
 	public void onStop() {
 		super.onStop();
 		Log.w(TAG, "onStop");
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		Log.w(TAG, "onDestroy");
@@ -175,13 +220,14 @@ public class UploadActivity extends Activity {
 
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREF_BPM,
-				Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences(
+				SettingsActivity.PREF_BPM, Context.MODE_PRIVATE);
 		boolean legacySMS = prefs.getBoolean(SettingsActivity.PREF_LEGACY_SMS,
 				SettingsActivity.DEFAULT_LEGACY_SMS);
 
 		// String idStored = preferences.getString("deviceId", "NO_ID");
-		// String macAddr = prefs.getString(SettingActivity.PREF_MAC_ADDR, SettingActivity.DEFAULT_MAC_ADDR);
+		// String macAddr = prefs.getString(SettingActivity.PREF_MAC_ADDR,
+		// SettingActivity.DEFAULT_MAC_ADDR);
 
 		// String msg = new
 		// StringBuilder(SettingActivity.APP_CODE).append(" ").append("@MAC="+macAddr+"@ ").toString();
@@ -200,15 +246,17 @@ public class UploadActivity extends Activity {
 		}
 
 		if (tmp != null) {
-			// msg = constructSMS(SettingActivity.PREF_BPM,-1, tmp.getSys(), tmp.getDia(),
+			// msg = constructSMS(SettingActivity.PREF_BPM,-1, tmp.getSys(),
+			// tmp.getDia(),
 			// tmp.getPulse(), -1, tmp.getDateTimeMySQL());
 			if (legacySMS)
-				msg = constructLegacySMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
-						tmp.getDia(), tmp.getPulse(), -1,
+				msg = constructLegacySMS(SettingsActivity.PREF_BPM, -1,
+						tmp.getSys(), tmp.getDia(), tmp.getPulse(), -1,
 						tmp.getDateTimeMySQL());
 			else
-				msg = constructSMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(), tmp.getDia(),
-						tmp.getPulse(), -1, tmp.getDateTimeMySQL());
+				msg = constructSMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
+						tmp.getDia(), tmp.getPulse(), -1,
+						tmp.getDateTimeMySQL());
 		}
 
 		Toast.makeText(this,
@@ -227,14 +275,15 @@ public class UploadActivity extends Activity {
 	private String constructSMS(String pref, int weight, int systolic,
 			int diastolic, int pulse, int spo2, String measurementDate) {
 		// Code for this app
-		String msg = SettingsActivity.APP_CODE + " ";
+		String msg = "";
 
 		// MAC address of the health device
 		String macAddr = SettingsActivity.DEFAULT_MAC_ADDR;
 
 		SharedPreferences tmp = getSharedPreferences(pref, Context.MODE_PRIVATE);
 		if (tmp != null) {
-			macAddr = tmp.getString(SettingsActivity.PREF_MAC_ADDR, SettingsActivity.DEFAULT_MAC_ADDR);
+			macAddr = tmp.getString(SettingsActivity.PREF_MAC_ADDR,
+					SettingsActivity.DEFAULT_MAC_ADDR);
 			if (D)
 				Log.w(TAG, "mac address of the pulse oximeter is " + macAddr);
 		}
@@ -282,7 +331,8 @@ public class UploadActivity extends Activity {
 
 		SharedPreferences tmp = getSharedPreferences(pref, Context.MODE_PRIVATE);
 		if (tmp != null) {
-			macAddr = tmp.getString(SettingsActivity.PREF_MAC_ADDR, SettingsActivity.DEFAULT_MAC_ADDR);
+			macAddr = tmp.getString(SettingsActivity.PREF_MAC_ADDR,
+					SettingsActivity.DEFAULT_MAC_ADDR);
 			if (D)
 				Log.w(TAG, "mac address of the health device is " + macAddr);
 		}
@@ -312,24 +362,28 @@ public class UploadActivity extends Activity {
 	public void handleSecureSMS(View view) {
 		EditText phoneNumberField = (EditText) findViewById(R.id.phoneNum);
 		String contactNum = phoneNumberField.getText().toString();
-		RSAPublicKeySpec pubKeySpec = MyKeyUtils.getRecipientsPublicKey(contactNum, getApplicationContext());
-		if (pubKeySpec==null) {
-			Toast.makeText(getApplicationContext(), "contact's key not found, requesting for it", Toast.LENGTH_LONG).show();
+		RSAPublicKeySpec pubKeySpec = MyKeyUtils.getRecipientsPublicKey(
+				contactNum, getApplicationContext());
+		if (pubKeySpec == null) {
+			Toast.makeText(getApplicationContext(),
+					"contact's key not found, requesting for it",
+					Toast.LENGTH_LONG).show();
 			Log.e(TAG, "contact's key not found, requesting for it");
 		} else {
 			sendSecureSMS();
 		}
 	}
-	
+
 	public void sendSecureSMS() {
 		// SharedPreferences preferences =
 		// PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		SharedPreferences prefs = getSharedPreferences(SettingsActivity.PREF_BPM,
-				Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences(
+				SettingsActivity.PREF_BPM, Context.MODE_PRIVATE);
 		boolean legacySMS = false;
 
 		EditText phoneNumberField = (EditText) findViewById(R.id.phoneNum);
 		String contactNum = phoneNumberField.getText().toString();
+		Log.w(TAG, "server's number is "+contactNum);
 
 		// String idStored = preferences.getString("deviceId", "NO_ID");
 		BPMeasurementData tmp = null;
@@ -347,15 +401,16 @@ public class UploadActivity extends Activity {
 		}
 
 		if (tmp != null) {
-			// msg = constructSMS(SettingActivity.PREF_BPM,-1, tmp.getSys(), tmp.getDia(),
+			// msg = constructSMS(SettingActivity.PREF_BPM,-1, tmp.getSys(),
+			// tmp.getDia(),
 			// tmp.getPulse(), -1, tmp.getDateTimeMySQL());
 			if (legacySMS)
-				measurementStr = constructLegacySMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
-						tmp.getDia(), tmp.getPulse(), -1,
+				measurementStr = constructLegacySMS(SettingsActivity.PREF_BPM,
+						-1, tmp.getSys(), tmp.getDia(), tmp.getPulse(), -1,
 						tmp.getDateTimeMySQL());
 			else
-				measurementStr = constructSMS(SettingsActivity.PREF_BPM, -1, tmp.getSys(),
-						tmp.getDia(), tmp.getPulse(), -1,
+				measurementStr = constructSMS(SettingsActivity.PREF_BPM, -1,
+						tmp.getSys(), tmp.getDia(), tmp.getPulse(), -1,
 						tmp.getDateTimeMySQL());
 		}
 
@@ -363,8 +418,10 @@ public class UploadActivity extends Activity {
 
 		// Toast.makeText(this, msg + "  length: " + msg.length(),
 		// Toast.LENGTH_LONG).show();
-		smsSender = new SmsSender(contactNum);
-		smsSender.sendSecureSMS(getApplicationContext(), measurementStr);
+		if (contactNum!=null||!contactNum.isEmpty()) {
+			smsSender = new SmsSender(contactNum);
+			smsSender.sendSecureSMS(getApplicationContext(), measurementStr);
+		}
 
 	}
 
@@ -445,21 +502,30 @@ public class UploadActivity extends Activity {
 			smsManager.sendTextMessage(phoneNumber, null, message, sentPI,
 					deliveredPI);
 	}
-	
+
 	/*
-     * a receiver here to receive key exchange message from server
-     * something like a service or asynctask has to request for the key from the server first of course
-     */
-    public void receivedBroadcast(Intent i, String contactNum) {
-				
-				SharedPreferences prefs = getSharedPreferences(contactNum, Context.MODE_PRIVATE);
-		String pubMod = prefs.getString(MyKeyUtils.PREF_PUBLIC_MOD, MyKeyUtils.DEFAULT_PREF);
-		
-		Log.w(TAG, "public modulus updated to "+pubMod);
-		Log.w(TAG, "public key found for contact "+contactNum+" "+(MyKeyUtils.getRecipientsPublicKey(contactNum, getApplicationContext())==null));
-		Toast.makeText(getApplicationContext(), "ready to send secure message", Toast.LENGTH_LONG).show();
+	 * a receiver here to receive key exchange message from server something
+	 * like a service or asynctask has to request for the key from the server
+	 * first of course
+	 */
+	public void receivedBroadcast(Intent i, String contactNum) {
+
+		SharedPreferences prefs = getSharedPreferences(contactNum,
+				Context.MODE_PRIVATE);
+		String pubMod = prefs.getString(MyKeyUtils.PREF_PUBLIC_MOD,
+				MyKeyUtils.DEFAULT_PREF);
+
+		Log.w(TAG, "public modulus updated to " + pubMod);
+		Log.w(TAG,
+				"public key found for contact "
+						+ contactNum
+						+ " "
+						+ (MyKeyUtils.getRecipientsPublicKey(contactNum,
+								getApplicationContext()) == null));
+		Toast.makeText(getApplicationContext(), "ready to send secure message",
+				Toast.LENGTH_LONG).show();
 	}
-	
+
 	private BroadcastReceiver smsListenerUploadActivity = new BroadcastReceiver() {
 		// SharedPreferences
 		private final String PREFS = "MyKeys";
@@ -476,251 +542,277 @@ public class UploadActivity extends Activity {
 		// sms codes
 		private final String KEY_EXCHANGE_CODE = "keyx";
 		private final String HEALTH_SMS = "gmstelehealth";
-		
-        @Override
-        public void onReceive(Context context, Intent intent) {
-        	//intent.putExtra(INTENT_SOURCE, "this comes from the sms receiver");
-        	
-        	
-        	// updating a sharedpreferences boolean value, hopefully the
-        				// activity can see the updated value after that
-        				SharedPreferences prefs = getSharedPreferences("prefs",
-        						Context.MODE_PRIVATE);
-        				SharedPreferences.Editor prefseditor = prefs.edit();
-        				prefseditor.putBoolean("receivedsms", true);
-        				prefseditor.commit();
-        	
-            //MainActivity.this.receivedBroadcast(intent);
-            
-            Map<String, String> msg = retrieveMessages(intent);
 
-    		Log.i(TAG, "we received " + msg.size() + " messages in total");
-    		if (msg != null) {
-    			for (String sender : msg.keySet()) {
-    				String message = msg.get(sender);
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// intent.putExtra(INTENT_SOURCE,
+			// "this comes from the sms receiver");
 
-    				Log.i(TAG, "message received is " + message);
+			// updating a sharedpreferences boolean value, hopefully the
+			// activity can see the updated value after that
+			SharedPreferences prefs = getSharedPreferences("prefs",
+					Context.MODE_PRIVATE);
+			SharedPreferences.Editor prefseditor = prefs.edit();
+			prefseditor.putBoolean("receivedsms", true);
+			prefseditor.commit();
 
-    				handleMessage(message, sender, context, intent);
-    			}
-    		}
-        }
-        
-        private void handleMessage(String message, String sender, Context context, Intent i) {
-    		if (message.startsWith(KEY_EXCHANGE_CODE)) {
-    			Log.i(TAG, "message received is a key exchange message");
-    			handleKeyExchangeMsg(message, sender, context, i);
-    		} else if (message.startsWith(HEALTH_SMS)) {
-    			Log.i(TAG, "received a secure text message");
-    			// TODO handle secure text message
-    			handleEncryptedMsg(message, sender, context);
-    		} else {
-    			Log.i(TAG, "Message not recognised, not doing anything");
-    		}
-    	}
+			// MainActivity.this.receivedBroadcast(intent);
 
-    	/*
-    	 * the sender here is actually the recipient of future encrypted text
-    	 * messages the recipient's public key will be used to encrypt the future
-    	 * text messages so that the recipient can use his/ her private key to
-    	 * decrypt the messages upon receiving them
-    	 */
-    	private void handleKeyExchangeMsg(String message, String sender,
-    			Context context, Intent i) {
-    		Toast.makeText(context, "got a key exchange message", Toast.LENGTH_LONG).show();
-    		// call MainActivitiy
-    		//MainActivity.this.receivedBroadcast(i);
-    		
-    		
-    		// TODO get the modulus and exponent of the public key of the sender &
-    		// reconstruct the public key
-    		String contactNum = sender;
-    		String[] parts = message.split(" "); // expected structure of the key exchange message: "keyx modBase64Encoded expBase64Encoded"
-    		if (parts.length == 3) {
-    			String recipientPubModBase64Str = parts[1];
-    			String recipientPubExpBase64Str = parts[2];
+			Map<String, String> msg = retrieveMessages(intent);
 
-    			/*
-    			 * ================================ for testing only - to be removed
-    			 * later
-    			 */
-    			// verifyRecipientsPublicKey(recipientPubModBase64Str,recipientPubExpBase64Str,
-    			// context);
-    			/*
-    			 * ================================
-    			 */
+			Log.i(TAG, "we received " + msg.size() + " messages in total");
+			if (msg != null) {
+				for (String sender : msg.keySet()) {
+					String message = msg.get(sender);
 
-    			byte[] recipientPubModBA = Base64.decode(recipientPubModBase64Str,
-    					Base64.DEFAULT); // TODO to decide whether to use NO_WRAP or NO_PADDING here
-    			byte[] recipientPubExpBA = Base64.decode(recipientPubExpBase64Str,
-    					Base64.DEFAULT);
-    			BigInteger recipientPubMod = new BigInteger(recipientPubModBA);
-    			BigInteger recipientPubExp = new BigInteger(recipientPubExpBA);
+					Log.i(TAG, "message received is " + message);
 
-    			Log.i(TAG, "the recipient's public key modulus is "
-    					+ recipientPubMod + " and exponent is " + recipientPubExp);
+					handleMessage(message, sender, context, intent);
+				}
+			}
+		}
 
-    			// TODO store the intended recipient's public key in the app's
-    			// SharedPreferences
-    			SharedPreferences prefs = context.getSharedPreferences(contactNum,
-    					Context.MODE_PRIVATE);
-    			SharedPreferences.Editor prefsEditor = prefs.edit();
+		private void handleMessage(String message, String sender,
+				Context context, Intent i) {
+			if (message.startsWith(KEY_EXCHANGE_CODE)) {
+				Log.i(TAG, "message received is a key exchange message");
+				handleKeyExchangeMsg(message, sender, context, i);
+			} else if (message.startsWith(HEALTH_SMS)) {
+				Log.i(TAG, "received a secure text message");
+				// TODO handle secure text message
+				handleEncryptedMsg(message, sender, context);
+			} else {
+				Log.i(TAG, "Message not recognised, not doing anything");
+			}
+		}
 
-    			prefsEditor.putString(PREF_PUBLIC_MOD, recipientPubModBase64Str);
-    			prefsEditor.putString(PREF_PUBLIC_EXP, recipientPubExpBase64Str);
-    			// prefsEditor.putString(PREF_PHONE_NUMBER, recipient);
-    			prefsEditor.commit();
+		/*
+		 * the sender here is actually the recipient of future encrypted text
+		 * messages the recipient's public key will be used to encrypt the
+		 * future text messages so that the recipient can use his/ her private
+		 * key to decrypt the messages upon receiving them
+		 */
+		private void handleKeyExchangeMsg(String message, String sender,
+				Context context, Intent i) {
+			Toast.makeText(context, "got a key exchange message",
+					Toast.LENGTH_LONG).show();
+			// call MainActivitiy
+			// MainActivity.this.receivedBroadcast(i);
 
-    			Log.i(TAG,
-    					"successfully remembered the contact " + contactNum
-    							+ " and its public key module "
-    							+ prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF)
-    							+ " and exponent "
-    							+ prefs.getString(PREF_PUBLIC_EXP, PREF_PUBLIC_EXP));
-    			Toast.makeText(context, "Got public key for "+contactNum, Toast.LENGTH_LONG).show();
-    			
-    			
-    			// TODO inform the UI Activity that public key is received
-    			UploadActivity.this.receivedBroadcast(i, contactNum);
-    			
-    			// TODO reload MainActivity so that it can read updated sharedpreferences
-    			/*Log.w(TAG, "restarting MainActivity");
-    			Intent intent = new Intent();
-    			intent.setClassName("sg.edu.dukenus.securesms", "sg.edu.dukenus.securesms.MainActivity");
-    			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    			context.startActivity(intent);*/
-    			
-    			// TODO handle a pending list of message to be sent securely due to lack of key
-    			
-    		} else {
-    			Log.e(TAG,
-    					"something is wrong with the key exchange message, it's supposed to have 3 parts: the code 'keyx', the modulus and the exponent");
-    		}
+			// TODO get the modulus and exponent of the public key of the sender
+			// &
+			// reconstruct the public key
+			String contactNum = sender;
+			String[] parts = message.split(" "); // expected structure of the
+													// key exchange message:
+													// "keyx modBase64Encoded expBase64Encoded"
+			if (parts.length == 3) {
+				String recipientPubModBase64Str = parts[1];
+				String recipientPubExpBase64Str = parts[2];
 
-    	}
+				/*
+				 * ================================ for testing only - to be
+				 * removed later
+				 */
+				// verifyRecipientsPublicKey(recipientPubModBase64Str,recipientPubExpBase64Str,
+				// context);
+				/*
+				 * ================================
+				 */
 
-    	private void handleEncryptedMsg(String message, String sender,
-    			Context context) {
-    		String contactNum = sender;
-    		String[] parts = message.split(" ");
-    		if (parts.length == 2) {
+				byte[] recipientPubModBA = Base64.decode(
+						recipientPubModBase64Str, Base64.DEFAULT); // TODO to
+																	// decide
+																	// whether
+																	// to use
+																	// NO_WRAP
+																	// or
+																	// NO_PADDING
+																	// here
+				byte[] recipientPubExpBA = Base64.decode(
+						recipientPubExpBase64Str, Base64.DEFAULT);
+				BigInteger recipientPubMod = new BigInteger(recipientPubModBA);
+				BigInteger recipientPubExp = new BigInteger(recipientPubExpBA);
 
-    			// TODO get the private key of the intended recipient
-    			SharedPreferences prefs = context.getSharedPreferences(
-    					PREFS, Context.MODE_PRIVATE);
+				Log.i(TAG, "the recipient's public key modulus is "
+						+ recipientPubMod + " and exponent is "
+						+ recipientPubExp);
 
-    			String privateMod = prefs.getString(PREF_PRIVATE_MOD, DEFAULT_PREF);
-    			String priavteExp = prefs.getString(PREF_PRIVATE_EXP, DEFAULT_PREF);
-    			// String recipient = prefs.getString(PREF_RECIPIENT_NUM,
-    			// DEFAULT_PREF);
-    			if (!privateMod.equals(DEFAULT_PREF)
-    					&& !priavteExp.equals(DEFAULT_PREF)) {
-    				byte[] recipientPrivateModBA = Base64.decode(privateMod,
-    						Base64.DEFAULT);
-    				byte[] recipientPrivateExpBA = Base64.decode(priavteExp,
-    						Base64.DEFAULT);
-    				BigInteger recipientPrivateMod = new BigInteger(
-    						recipientPrivateModBA);
-    				BigInteger recipientPrivateExp = new BigInteger(
-    						recipientPrivateExpBA);
-    				RSAPrivateKeySpec recipientPrivateKeySpec = new RSAPrivateKeySpec(
-    						recipientPrivateMod, recipientPrivateExp);
+				// TODO store the intended recipient's public key in the app's
+				// SharedPreferences
+				SharedPreferences prefs = context.getSharedPreferences(
+						contactNum, Context.MODE_PRIVATE);
+				SharedPreferences.Editor prefsEditor = prefs.edit();
 
-    				// TODO decrypt the encrypted message
-    				decryptMsg(parts[1], recipientPrivateKeySpec);
-    			} else {
-    				Log.e(TAG, "private key could not be retrieved");
-    			}
-    		} else {
-    			Log.e(TAG,
-    					"message has incorrect format, it's suppose to be 'gmstelehealth [measurements]'");
-    		}
-    	}
+				prefsEditor
+						.putString(PREF_PUBLIC_MOD, recipientPubModBase64Str);
+				prefsEditor
+						.putString(PREF_PUBLIC_EXP, recipientPubExpBase64Str);
+				// prefsEditor.putString(PREF_PHONE_NUMBER, recipient);
+				prefsEditor.commit();
 
-    	private void decryptMsg(String msg, RSAPrivateKeySpec privateKey) {
-    		try {
-    			KeyFactory fact = KeyFactory.getInstance("RSA");
+				Log.i(TAG,
+						"successfully remembered the contact "
+								+ contactNum
+								+ " and its public key module "
+								+ prefs.getString(PREF_PUBLIC_MOD, DEFAULT_PREF)
+								+ " and exponent "
+								+ prefs.getString(PREF_PUBLIC_EXP,
+										PREF_PUBLIC_EXP));
+				Toast.makeText(context, "Got public key for " + contactNum,
+						Toast.LENGTH_LONG).show();
 
-    			PrivateKey privKey = fact.generatePrivate(privateKey);
+				// TODO inform the UI Activity that public key is received
+				UploadActivity.this.receivedBroadcast(i, contactNum);
 
-    			// TODO encrypt the message and send it
-    			// first decode the Base64 encoded string to get the encrypted
-    			// message
-    			byte[] encryptedMsg = Base64.decode(msg, Base64.DEFAULT);
-    			Log.i(TAG, "We got a message: " + msg
-    					+ " and after decode we got the encrypted message : "
-    					+ new String(encryptedMsg));
+				// TODO reload MainActivity so that it can read updated
+				// sharedpreferences
+				/*
+				 * Log.w(TAG, "restarting MainActivity"); Intent intent = new
+				 * Intent(); intent.setClassName("sg.edu.dukenus.securesms",
+				 * "sg.edu.dukenus.securesms.MainActivity");
+				 * intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				 * context.startActivity(intent);
+				 */
 
-    			Cipher cipher = Cipher.getInstance("RSA");
-    			cipher.init(Cipher.DECRYPT_MODE, privKey);
-    			// byte[] msgByteArray = msg.getBytes();
+				// TODO handle a pending list of message to be sent securely due
+				// to lack of key
 
-    			byte[] cipherData = cipher.doFinal(encryptedMsg);
+			} else {
+				Log.e(TAG,
+						"something is wrong with the key exchange message, it's supposed to have 3 parts: the code 'keyx', the modulus and the exponent");
+			}
 
-    			String decryptedMsg = new String(cipherData);
-    			Log.i(TAG, "After decryption, we got the original message '"
-    					+ decryptedMsg + "'");
+		}
 
-    		} catch (NoSuchAlgorithmException e) {
-    			Log.e(TAG, "RSA algorithm not available", e);
-    		} catch (InvalidKeySpecException e) {
-    			Log.e(TAG, "", e);
-    		} catch (NoSuchPaddingException e) {
-    			Log.e(TAG, "", e);
-    		} catch (InvalidKeyException e) {
-    			Log.e(TAG, "", e);
-    		} catch (BadPaddingException e) {
-    			Log.e(TAG, "", e);
-    		} catch (IllegalBlockSizeException e) {
-    			Log.e(TAG, "", e);
-    		}
-    	}
+		private void handleEncryptedMsg(String message, String sender,
+				Context context) {
+			String contactNum = sender;
+			String[] parts = message.split(" ");
+			if (parts.length == 2) {
 
-    	private Map<String, String> retrieveMessages(Intent intent) {
-    		Map<String, String> msg = null;
-    		SmsMessage[] msgs = null;
-    		Bundle bundle = intent.getExtras();
+				// TODO get the private key of the intended recipient
+				SharedPreferences prefs = context.getSharedPreferences(PREFS,
+						Context.MODE_PRIVATE);
 
-    		if (bundle != null && bundle.containsKey("pdus")) {
-    			Object[] pdus = (Object[]) bundle.get("pdus");
+				String privateMod = prefs.getString(PREF_PRIVATE_MOD,
+						DEFAULT_PREF);
+				String priavteExp = prefs.getString(PREF_PRIVATE_EXP,
+						DEFAULT_PREF);
+				// String recipient = prefs.getString(PREF_RECIPIENT_NUM,
+				// DEFAULT_PREF);
+				if (!privateMod.equals(DEFAULT_PREF)
+						&& !priavteExp.equals(DEFAULT_PREF)) {
+					byte[] recipientPrivateModBA = Base64.decode(privateMod,
+							Base64.DEFAULT);
+					byte[] recipientPrivateExpBA = Base64.decode(priavteExp,
+							Base64.DEFAULT);
+					BigInteger recipientPrivateMod = new BigInteger(
+							recipientPrivateModBA);
+					BigInteger recipientPrivateExp = new BigInteger(
+							recipientPrivateExpBA);
+					RSAPrivateKeySpec recipientPrivateKeySpec = new RSAPrivateKeySpec(
+							recipientPrivateMod, recipientPrivateExp);
 
-    			if (pdus != null) {
-    				int nbrOfpdus = pdus.length;
-    				msg = new HashMap<String, String>(nbrOfpdus);
-    				msgs = new SmsMessage[nbrOfpdus];
+					// TODO decrypt the encrypted message
+					decryptMsg(parts[1], recipientPrivateKeySpec);
+				} else {
+					Log.e(TAG, "private key could not be retrieved");
+				}
+			} else {
+				Log.e(TAG,
+						"message has incorrect format, it's suppose to be 'gmstelehealth [measurements]'");
+			}
+		}
 
-    				// There can be multiple SMS from multiple senders, there can be
-    				// a maximum of nbrOfpdus different senders
-    				// However, send long SMS of same sender in one message
-    				for (int i = 0; i < nbrOfpdus; i++) {
-    					msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+		private void decryptMsg(String msg, RSAPrivateKeySpec privateKey) {
+			try {
+				KeyFactory fact = KeyFactory.getInstance("RSA");
 
-    					String originatinAddress = msgs[i].getOriginatingAddress();
+				PrivateKey privKey = fact.generatePrivate(privateKey);
 
-    					// Check if index with number exists
-    					if (!msg.containsKey(originatinAddress)) {
-    						// Index with number doesn't exist
-    						// Save string into associative array with sender number
-    						// as index
-    						msg.put(msgs[i].getOriginatingAddress(),
-    								msgs[i].getMessageBody());
+				// TODO encrypt the message and send it
+				// first decode the Base64 encoded string to get the encrypted
+				// message
+				byte[] encryptedMsg = Base64.decode(msg, Base64.DEFAULT);
+				Log.i(TAG, "We got a message: " + msg
+						+ " and after decode we got the encrypted message : "
+						+ new String(encryptedMsg));
 
-    					} else {
-    						// Number has been there, add content but consider that
-    						// msg.get(originatinAddress) already contains
-    						// sms:sndrNbr:previousparts of SMS,
-    						// so just add the part of the current PDU
-    						String previousparts = msg.get(originatinAddress);
-    						String msgString = previousparts
-    								+ msgs[i].getMessageBody();
-    						msg.put(originatinAddress, msgString);
-    					}
-    				}
-    			}
-    		}
+				Cipher cipher = Cipher.getInstance("RSA");
+				cipher.init(Cipher.DECRYPT_MODE, privKey);
+				// byte[] msgByteArray = msg.getBytes();
 
-    		return msg;
-    	}
-    };
+				byte[] cipherData = cipher.doFinal(encryptedMsg);
+
+				String decryptedMsg = new String(cipherData);
+				Log.i(TAG, "After decryption, we got the original message '"
+						+ decryptedMsg + "'");
+
+			} catch (NoSuchAlgorithmException e) {
+				Log.e(TAG, "RSA algorithm not available", e);
+			} catch (InvalidKeySpecException e) {
+				Log.e(TAG, "", e);
+			} catch (NoSuchPaddingException e) {
+				Log.e(TAG, "", e);
+			} catch (InvalidKeyException e) {
+				Log.e(TAG, "", e);
+			} catch (BadPaddingException e) {
+				Log.e(TAG, "", e);
+			} catch (IllegalBlockSizeException e) {
+				Log.e(TAG, "", e);
+			}
+		}
+
+		private Map<String, String> retrieveMessages(Intent intent) {
+			Map<String, String> msg = null;
+			SmsMessage[] msgs = null;
+			Bundle bundle = intent.getExtras();
+
+			if (bundle != null && bundle.containsKey("pdus")) {
+				Object[] pdus = (Object[]) bundle.get("pdus");
+
+				if (pdus != null) {
+					int nbrOfpdus = pdus.length;
+					msg = new HashMap<String, String>(nbrOfpdus);
+					msgs = new SmsMessage[nbrOfpdus];
+
+					// There can be multiple SMS from multiple senders, there
+					// can be
+					// a maximum of nbrOfpdus different senders
+					// However, send long SMS of same sender in one message
+					for (int i = 0; i < nbrOfpdus; i++) {
+						msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+
+						String originatinAddress = msgs[i]
+								.getOriginatingAddress();
+
+						// Check if index with number exists
+						if (!msg.containsKey(originatinAddress)) {
+							// Index with number doesn't exist
+							// Save string into associative array with sender
+							// number
+							// as index
+							msg.put(msgs[i].getOriginatingAddress(),
+									msgs[i].getMessageBody());
+
+						} else {
+							// Number has been there, add content but consider
+							// that
+							// msg.get(originatinAddress) already contains
+							// sms:sndrNbr:previousparts of SMS,
+							// so just add the part of the current PDU
+							String previousparts = msg.get(originatinAddress);
+							String msgString = previousparts
+									+ msgs[i].getMessageBody();
+							msg.put(originatinAddress, msgString);
+						}
+					}
+				}
+			}
+
+			return msg;
+		}
+	};
 
 }
