@@ -18,7 +18,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import sg.edu.dukenus.bpmomron.SettingsActivity;
 import sg.edu.dukenus.securesms.sms.SmsSender;
 import sg.edu.dukenus.securesms.utils.MyUtils;
 
@@ -301,10 +300,10 @@ public class MyKeyUtils {
 			String pubExpBase64Str = Base64.encodeToString(pubExpBA,
 					Base64.NO_WRAP);
 
-			Log.i(TAG, "the modulus of the current user's public key is "
+			/*Log.i(TAG, "the modulus of the current user's public key is "
 					+ pubModBI + " and the exponent is " + pubExpBI
 					+ " | encoded module is " + pubModBase64Str
-					+ " | encoded exponent is " + pubExpBase64Str);
+					+ " | encoded exponent is " + pubExpBase64Str);*/
 
 			savePublicKey(pubModBase64Str, pubExpBase64Str, context);
 
@@ -331,10 +330,10 @@ public class MyKeyUtils {
 					Base64.NO_WRAP);
 			String privateExpBase64Str = Base64.encodeToString(privateExpBA,
 					Base64.NO_WRAP);
-			Log.i(TAG, "the modulus of the current user's private key is "
+			/*Log.i(TAG, "the modulus of the current user's private key is "
 					+ privateModBI + " and the exponent is " + privateExpBI
 					+ " | encoded module is " + privateModBase64Str
-					+ " | encoded exponent is " + privateExpBase64Str);
+					+ " | encoded exponent is " + privateExpBase64Str);*/
 
 			savePrivateKey(privateModBase64Str, privateExpBase64Str, context);
 
@@ -355,13 +354,14 @@ public class MyKeyUtils {
 	}
 
 	public static void requestForKey(String contactNum, Context context) {
-		// Log.w(TAG, "hey why is this not running?");
+		Log.w(TAG, "Requesting key for contact "+contactNum);
 		// get user's own keys
 		boolean keys = MyKeyUtils.getKeys(DEFAULT_KEY_SIZE, context);
 
 		if (keys) {
 			Log.w(TAG, ">> requestForKey() - user's own keys found");
 			SmsSender smsSender = new SmsSender(contactNum);
+			smsSender.setRecipientNum(contactNum);
 
 			smsSender.sendKeyExchangeSMS(context);
 		} else {
@@ -371,14 +371,22 @@ public class MyKeyUtils {
 
 	}
 
-	public static void checkKeys(Context context) {
+	/*
+	 * Check for existence of the server's key
+	 * It first checks whether server's number is set in the app's main SharedPreferences
+	 * Then it checks whether a key is available for such number
+	 * arguments:
+	 * 1. prefName : - the name of the app's main SharedPreferences
+	 * 2. serverNumPref: - the name of the SharedPreferences value which the server's number is stored to
+	 */
+	public static void checkKeys(String prefName, String serverNumPref, Context context) {
 		/*
 		 * Check existing public key of the number set in Settings e.g. Gammu
 		 * server +6584781395 request for key if not found
 		 */
 		SharedPreferences prefs1 = context.getSharedPreferences(
-				SettingsActivity.PREF_BPM, Context.MODE_PRIVATE);
-		String setServerNum = prefs1.getString(SettingsActivity.PREF_DES_NUM,
+				prefName, Context.MODE_PRIVATE);
+		String setServerNum = prefs1.getString(serverNumPref,
 				"");
 		Log.w(TAG, ">> checkKeys() - checking whether a key is stored for "
 				+ setServerNum);

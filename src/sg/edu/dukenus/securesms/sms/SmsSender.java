@@ -24,8 +24,13 @@ public class SmsSender {
 
 	private String recipientNum;
 	private String message;
-
-	private final String HEALTH_SMS = "gmstelehealth";
+	
+	/*
+	 * IMPORTANT: there is 1 trailing space character at the end of the SMS prefixes
+	 */
+	public static final String HEALTH_SMS_PREFIX = "gmstelehealth ";
+	public static final String LEGACY_SMS_PREFIX = "From ";
+	
 
 	public SmsSender(String phoneNum, String msg) {
 		this.recipientNum = phoneNum;
@@ -128,7 +133,7 @@ public class SmsSender {
 		// Context.MODE_PRIVATE);
 		if (this.recipientNum==null || this.recipientNum.isEmpty()) {
 			Log.e(TAG, "Recipient number is not set: "+this.recipientNum);
-			MyUtils.alert("Recipient number not set", context);
+			//MyUtils.alert("Recipient number not set", context); // can do this here because this is called in doInBackground()
 		} else {
 
 			String pubMod = MyKeyUtils.getPubMod(MyKeyUtils.PREFS_MY_KEYS, context);
@@ -141,7 +146,7 @@ public class SmsSender {
 				sendKeyExchangeSMS(this.recipientNum, pubMod, pubExp, context);
 			} else {
 				Log.e(TAG, "mod or exp of public key not found");
-				MyUtils.alert("key not found, please generate first", context);
+				//MyUtils.alert("key not found, please generate first", context);
 			}
 		}
 	}
@@ -181,9 +186,6 @@ public class SmsSender {
 		 * return; }
 		 */
 
-		Log.i(TAG, "sendSecureSMS(" + this.message + ", " + this.recipientNum
-				+ ")");
-
 		try {
 			Log.d(TAG, "measurement before encryption: " + measurementStr
 					+ " and recipient's key is not null "
@@ -204,7 +206,7 @@ public class SmsSender {
 			// TODO encode the main content of the message and compose the SMS
 			// message
 
-			String smsMsg = HEALTH_SMS + " " + processedMeasurementStr;
+			String smsMsg = HEALTH_SMS_PREFIX + processedMeasurementStr;
 			Log.w(TAG, "measurement string after encryption: " + encrypted
 					+ " and then after base64 encoding: "
 					+ processedMeasurementStr);
@@ -212,6 +214,8 @@ public class SmsSender {
 
 			// set the final message to be sent
 			this.message = smsMsg;
+			Log.i(TAG, "sendSecureSMS(" + this.message + ", " + this.recipientNum
+					+ ")");
 
 			// TextView debug = (TextView) findViewById(R.id.DebugMessages);
 			// debug.append("Sending secure sms: '" + smsMsg +
@@ -234,5 +238,37 @@ public class SmsSender {
 			Log.e(TAG, "Exception happens", e);
 		}
 
+	}
+	
+	/*
+	 * send health measurement strings in plaintext
+	 */
+	public void sendPlainText(Context context, String measurementStr, String prefix) {
+		String smsMsg = prefix + measurementStr;
+		
+		Log.w(TAG, "complete message to be sent: '" + smsMsg + "'");
+
+		// set the final message to be sent
+		this.message = smsMsg;
+		Log.i(TAG, ">> sendPlainText(" + this.message + ", " + this.recipientNum
+				+ ")");
+
+		// TextView debug = (TextView) findViewById(R.id.DebugMessages);
+		// debug.append("Sending secure sms: '" + smsMsg +
+		// "' with length: "+smsMsg.length());
+		// TODO send the SMS message
+		Log.w(TAG, "length of the message is " + smsMsg.length());
+		if (smsMsg.length() > 160) {
+			Log.i(TAG, "sms is " + this.message + " and recipient is "
+					+ this.recipientNum);
+			sendLongSMS(context);
+			// for testing only
+			// sendSMS(recipient, "gmstelehealth eKAoUlBFA9JEU31pRjHa");
+			// //this message should be short enough or is it?
+		} else {
+			Log.i(TAG, "sms is " + this.message + " and recipient is "
+					+ this.recipientNum);
+			sendSMS(context);
+		}
 	}
 }

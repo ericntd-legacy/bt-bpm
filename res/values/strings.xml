@@ -63,7 +63,7 @@
     
     <!-- Buttons -->
     <string name="btn_save">Save</string>
-    <string name="btn_send_sms">Send SMS</string>
+    <string name="btn_send_sms">Send Plain Text</string>
     <string name="btn_send_secure_sms">Send Secure SMS</string>
     
     <!-- Checkbox -->

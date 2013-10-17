@@ -73,6 +73,12 @@ public class MainActivity extends Activity {
 	public void onStart() {
 		super.onStart();
 		Log.w(TAG, "onStart");
+		
+		/*
+		 * Checking the phone's key as well as server's key
+		 */
+		Log.w(TAG, "checking the server's key as well as the phone's key");
+		MyKeyUtils.checkKeys(SettingsActivity.PREF_BPM, SettingsActivity.PREF_DES_NUM, getApplicationContext());
 	}
 
 	@Override
@@ -87,11 +93,6 @@ public class MainActivity extends Activity {
 		iff.addAction("android.provider.Telephony.SMS_RECEIVED");
 		this.registerReceiver(this.mSmsReceiver, iff);
 		
-		/*
-		 * Checking the phone's key as well as server's key
-		 */
-		Log.w(TAG, "checking the server's key as well as the phone's key");
-		MyKeyUtils.checkKeys(getApplicationContext());
 	}
 
 	@Override

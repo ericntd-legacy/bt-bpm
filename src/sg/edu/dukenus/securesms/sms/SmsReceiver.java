@@ -16,8 +16,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import sg.edu.dukenus.bpmomron.MainActivity;
-
 //import org.apache.commons.codec.binary.Base64;
 import android.util.Base64;
 

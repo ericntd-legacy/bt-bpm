@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package sg.edu.dukenus.bpmomron;
+package sg.edu.nus.omronhealth;
 
 public final class R {
     public static final class array {
@@ -43,20 +43,18 @@ public final class R {
         public static final int noti_icon_1=0x7f020004;
     }
     public static final class id {
-        public static final int BtnSendPlainText=0x7f070022;
-        public static final int BtnSendSecureSMS=0x7f070023;
         public static final int CheckboxEnableLegacySMS=0x7f070017;
         public static final int LabelSMSFormat=0x7f070020;
-        public static final int LayoutMAC=0x7f070037;
-        public static final int OptionUploadLatest=0x7f07003b;
         public static final int TableSettings=0x7f07000b;
         /**  Messages IDs 
          */
         public static final int auto_focus=0x7f070000;
         public static final int barcode_image_view=0x7f070027;
         public static final int btnSave=0x7f070018;
+        public static final int btn_encodedSms=0x7f070023;
         public static final int btn_init_setup=0x7f07000a;
         public static final int btn_myMeasurement=0x7f070009;
+        public static final int btn_normalSms=0x7f070022;
         public static final int btn_settings=0x7f070008;
         public static final int btn_update=0x7f070007;
         public static final int btn_uploadOrFirstTime=0x7f07001d;
@@ -65,7 +63,7 @@ public final class R {
         public static final int decode=0x7f070001;
         public static final int decode_failed=0x7f070002;
         public static final int decode_succeeded=0x7f070003;
-        public static final int discoverable=0x7f070039;
+        public static final int discoverable=0x7f070037;
         public static final int encode_view=0x7f070034;
         public static final int format_text_view=0x7f070029;
         public static final int format_text_view_label=0x7f070028;
@@ -79,8 +77,7 @@ public final class R {
         public static final int labelDeviceId=0x7f07000d;
         public static final int labelMacAddr=0x7f070013;
         public static final int layoutSMSFormat=0x7f070016;
-        public static final int linearLayout1=0x7f070036;
-        public static final int menu_settings=0x7f070038;
+        public static final int menu_settings=0x7f070036;
         public static final int meta_text_view=0x7f07002f;
         public static final int meta_text_view_label=0x7f07002e;
         public static final int phoneNum=0x7f070021;
@@ -89,7 +86,7 @@ public final class R {
         public static final int restart_preview=0x7f070005;
         public static final int result_view=0x7f070026;
         public static final int return_scan_result=0x7f070006;
-        public static final int secure_connect_scan=0x7f07003a;
+        public static final int secure_connect_scan=0x7f070038;
         public static final int statusLbl=0x7f070019;
         public static final int statusText=0x7f07001a;
         public static final int status_view=0x7f070031;
@@ -117,7 +114,6 @@ public final class R {
         public static final int decoder=0x7f030007;
         public static final int encoder=0x7f030008;
         public static final int message=0x7f030009;
-        public static final int setting=0x7f03000a;
     }
     public static final class menu {
         public static final int activity_main=0x7f0b0000;

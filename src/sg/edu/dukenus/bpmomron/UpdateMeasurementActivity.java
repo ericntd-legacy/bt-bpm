@@ -96,7 +96,7 @@ public class UpdateMeasurementActivity extends Activity {
 			Log.e(TAG, "++onCreate++");
 		setContentView(R.layout.activity_update_measurement);
 
-		MyKeyUtils.checkKeys(getApplicationContext());
+		//MyKeyUtils.checkKeys(getApplicationContext());
 
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -120,7 +120,7 @@ public class UpdateMeasurementActivity extends Activity {
 	public void onStart() {
 		super.onStart();
 		if (D)
-			Log.e(TAG, "++ ON START ++");
+			Log.w(TAG, "++ ON START ++");
 
 		// If BT is not on, request that it be enabled.
 		// setupChat() will then be called during onActivityResult
@@ -143,6 +143,12 @@ public class UpdateMeasurementActivity extends Activity {
 		guideImage.setBackgroundResource(R.drawable.guide);
 		guideAnimation = (AnimationDrawable) guideImage.getBackground();
 		guideAnimation.start();
+		
+		/*
+		 * Checking the phone's key as well as server's key
+		 */
+		Log.w(TAG, "checking the server's key as well as the phone's key");
+		MyKeyUtils.checkKeys(SettingsActivity.PREF_BPM, SettingsActivity.PREF_DES_NUM, getApplicationContext());
 
 	}
 
@@ -150,7 +156,7 @@ public class UpdateMeasurementActivity extends Activity {
 	public synchronized void onResume() {
 		super.onResume();
 		if (D)
-			Log.e(TAG, "+ ON RESUME +");
+			Log.w(TAG, "+ ON RESUME +");
 
 		// Performing this check in onResume() covers the case in which BT was
 		// not enabled during onStart(), so we were paused to enable it...

@@ -51,15 +51,15 @@
         android:layout_centerInParent="true">
 
         <Button
-            android:id="@+id/btn_normalSms"
+            android:id="@+id/BtnSendPlainText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:enabled="false"
-            android:onClick="onNormalSms"
+            android:onClick="handlePlainText"
             android:text="@string/btn_send_sms" />
 
         <Button
-            android:id="@+id/btn_encodedSms"
+            android:id="@+id/BtnSendSecureSMS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="handleSecureSMS"
